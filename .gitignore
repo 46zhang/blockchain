@@ -32,4 +32,8 @@ build/
 
 ### VS Code ###
 .vscode/
-logs/
+
+
+fundraising/lib
+fundraising/logs
+fundraising/target
