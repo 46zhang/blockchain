@@ -12,7 +12,7 @@ import java.util.Map;
 @ControllerAdvice
 @RestController
 @RequestMapping("/manage")
-public class Manager {
+public class ManagerController {
 
     @Autowired
     ManageService manageService;

@@ -1,8 +1,8 @@
 package com.gdut.fundraising.blockchain.Service.impl;
 
+import com.gdut.fundraising.blockchain.*;
 import com.gdut.fundraising.blockchain.Service.TransactionService;
 import com.gdut.fundraising.blockchain.Service.UTXOService;
-import com.gdut.fundraising.blockchain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -313,7 +313,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public HashMap<String, Transaction> removeTransactionFromTransactionPool(HashMap<String, Transaction> pool,
                                                                              List<Transaction> txs) {
-        HashMap<String,Transaction> deletedTransaction=new HashMap<>();
+        HashMap<String, Transaction> deletedTransaction=new HashMap<>();
         for(Transaction t:txs){
             if(pool.containsKey(t.getId())){
                 deletedTransaction.put(t.getId(),t);

@@ -7,7 +7,6 @@ import com.gdut.fundraising.entities.UserTblEntity;
 import com.gdut.fundraising.exception.BaseException;
 import org.springframework.stereotype.Component;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
 @Component

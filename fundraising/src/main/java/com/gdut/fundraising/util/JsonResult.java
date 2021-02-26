@@ -30,7 +30,7 @@ public class JsonResult<T> {
         return new JsonResult<T>(code, msg, null);
     }
     public static <T> JsonResult<T> error(int code, String msg, T data) {
-        return new JsonResult<T> (code, msg, data);
+        return new JsonResult<T>(code, msg, data);
     }
 
     public JsonResult addKey(String key, Object value){

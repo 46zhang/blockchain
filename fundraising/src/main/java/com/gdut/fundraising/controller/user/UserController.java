@@ -5,7 +5,6 @@ import com.gdut.fundraising.entities.UserTblEntity;
 import com.gdut.fundraising.exception.BaseException;
 import com.gdut.fundraising.service.UserService;
 import com.gdut.fundraising.util.JsonResult;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +14,7 @@ import java.util.Map;
 @ControllerAdvice//全局异常处理
 @RestController
 @RequestMapping(value = "/user")
-public class User {
+public class UserController {
     @Autowired
     private UserService userService;
 

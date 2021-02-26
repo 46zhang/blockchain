@@ -15,6 +15,6 @@ public interface UTXOService {
      */
     HashMap<Pointer, UTXO> deleteUTXOByPointer(HashMap<Pointer, UTXO> utxoHashMap, List<Pointer> pointerList);
 
-    void addUTXOToMap(HashMap<Pointer,UTXO>utxoHashMap,List<UTXO> utxoList);
+    void addUTXOToMap(HashMap<Pointer, UTXO>utxoHashMap, List<UTXO> utxoList);
 
 }

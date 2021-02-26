@@ -1,7 +1,7 @@
 package com.gdut.fundraising.blockchain.Service.impl;
 
-import com.gdut.fundraising.blockchain.Service.UTXOService;
 import com.gdut.fundraising.blockchain.Pointer;
+import com.gdut.fundraising.blockchain.Service.UTXOService;
 import com.gdut.fundraising.blockchain.UTXO;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ public class UTXOServiceImpl implements UTXOService {
      */
     @Override
     public HashMap<Pointer, UTXO> deleteUTXOByPointer(HashMap<Pointer, UTXO> utxoHashMap, List<Pointer> pointerList) {
-        HashMap<Pointer,UTXO> deletedUTXO=new HashMap<>();
+        HashMap<Pointer, UTXO> deletedUTXO=new HashMap<>();
         for(Pointer p: pointerList){
             if(utxoHashMap.containsKey(p)){
                 deletedUTXO.put(p,utxoHashMap.get(p));
