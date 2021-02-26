@@ -167,7 +167,7 @@
 
     <!-- 4. 最终的策略 -->
     <!-- 4.1 开发环境:打印控制台-->
-    <springProfile name="dev">
+    <springProfile name="dev8090,dev8091,dev8092">
         <!--com.gdut.fundraising 包下 debug级别 -->
         <logger name="com.gdut.fundraising" level="debug"/>
     </springProfile>
