@@ -18,4 +18,14 @@ public class RaftLogManagerImpl implements RaftLogManager {
     public long getLsatLogTerm() {
         return 0;
     }
+
+    @Override
+    public LogEntry read(long index) {
+        return null;
+    }
+
+    @Override
+    public void removeOnStartIndex(long l) {
+
+    }
 }

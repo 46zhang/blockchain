@@ -116,6 +116,7 @@ public abstract class DefaultNode {
      */
     protected RaftLogManager raftLogManager;
 
+
     DefaultNode() {
         //TODO 添加其他网络节点
         init();

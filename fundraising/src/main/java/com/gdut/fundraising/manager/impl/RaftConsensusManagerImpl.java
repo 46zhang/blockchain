@@ -122,43 +122,44 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
             // 第一次
             if (node.getRaftLogManager().getLastLogIndex() != 0 && param.getPrevLogIndex() != 0) {
                 LogEntry logEntry;
-//                if ((logEntry = node.getRaftLogManager().getLastLogEntry().read(param.getPrevLogIndex())) != null) {
-//                    // 如果日志在 prevLogIndex 位置处的日志条目的任期号和 prevLogTerm 不匹配，则返回 false
-//                    // 需要减小 nextIndex 重试.
-//                    if (logEntry.getTerm() != param.getPreLogTerm()) {
-//                        return result;
-//                    }
-//                } else {
-//                    // index 不对, 需要递减 nextIndex 重试.
-//                    return result;
-//                }
+                if ((logEntry = node.getRaftLogManager().read(param.getPrevLogIndex())) != null) {
+                    // 如果日志在 prevLogIndex 位置处的日志条目的任期号和 prevLogTerm 不匹配，则返回 false
+                    // 需要减小 nextIndex 重试.
+                    if (logEntry.getTerm() != param.getPreLogTerm()) {
+                        return result;
+                    }
+                } else {
+                    // index 不对, 需要递减 nextIndex 重试.
+                    return result;
+                }
 
             }
 
-//            // 如果已经存在的日志条目和新的产生冲突（索引值相同但是任期号不同），删除这一条和之后所有的
-//            LogEntry existLog = node.getLogModule().read(((param.getPrevLogIndex() + 1)));
-//            if (existLog != null && existLog.getTerm() != param.getEntries()[0].getTerm()) {
-//                // 删除这一条和之后所有的, 然后写入日志和状态机.
-//                node.getLogModule().removeOnStartIndex(param.getPrevLogIndex() + 1);
-//            } else if (existLog != null) {
-//                // 已经有日志了, 不能重复写入.
-//                result.setSuccess(true);
-//                return result;
-//            }
-//
-//            // 写进日志并且应用到状态机
-//            for (LogEntry entry : param.getEntries()) {
-//                node.getLogModule().write(entry);
-//                node.stateMachine.apply(entry);
-//                result.setSuccess(true);
-//            }
-//
-//            //如果 leaderCommit > commitIndex，令 commitIndex 等于 leaderCommit 和 新日志条目索引值中较小的一个
-//            if (param.getLeaderCommit() > node.getCommitIndex()) {
-//                int commitIndex = (int) Math.min(param.getLeaderCommit(), node.getLogModule().getLastIndex());
-//                node.setCommitIndex(commitIndex);
-//                node.setLastApplied(commitIndex);
-//            }
+            // 如果已经存在的日志条目和新的产生冲突（索引值相同但是任期号不同），删除这一条和之后所有的
+            LogEntry existLog = node.getRaftLogManager().read(((param.getPrevLogIndex() + 1)));
+            if (existLog != null && existLog.getTerm() != param.getEntries()[0].getTerm()) {
+                // 删除这一条和之后所有的, 然后写入日志和状态机.
+                node.getRaftLogManager().removeOnStartIndex(param.getPrevLogIndex() + 1);
+            } else if (existLog != null) {
+                // 已经有日志了, 不能重复写入.
+                result.setSuccess(true);
+                return result;
+            }
+
+            // 写进日志并且应用到状态机
+            for (LogEntry entry : param.getEntries()) {
+                node.getRaftLogManager().write(entry);
+                //暂时不用状态机
+                //node.stateMachine.apply(entry);
+                result.setSuccess(true);
+            }
+
+            //如果 leaderCommit > commitIndex，令 commitIndex 等于 leaderCommit 和 新日志条目索引值中较小的一个
+            if (param.getLeaderCommit() > node.getCommitIndex()) {
+                int commitIndex = (int) Math.min(param.getLeaderCommit(), node.getRaftLogManager().getLastLogIndex());
+                node.setCommitIndex(commitIndex);
+                node.setLastApplied(commitIndex);
+            }
 
             result.setTerm(node.getCurrentTerm());
 

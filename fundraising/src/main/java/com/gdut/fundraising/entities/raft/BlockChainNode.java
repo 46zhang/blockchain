@@ -17,13 +17,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadLocalRandom;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -110,6 +105,194 @@ public class BlockChainNode extends DefaultNode {
     }
 
     /**
+     * 发送数据给其他节点去保持一致性
+     * @param data
+     * @return
+     */
+    public boolean sendLogToOtherNodeForConsistency(String data){
+        //构建索引
+        LogEntry logEntry=buildLogEntry(currentTerm,data,raftLogManager.getLastLogIndex()+1);
+        //下面采用原子量进行复制的统计
+        final AtomicInteger success = new AtomicInteger(0);
+        //异步
+        List<Future<Boolean>> futureList = new CopyOnWriteArrayList<>();
+
+        // 预提交到本地日志
+        //here write ahead log(my local log)
+        //如果后面发生日志复制达不到一半的条件，则执行撤销
+        raftLogManager.write(logEntry);
+        LOGGER.info("write logModule success, logEntry info : {}, log index : {}", logEntry, logEntry.getIndex());
+
+        int count=0;
+        //给每个节点同步数据
+        for(NodeInfo nodeInfo:nodeInfoSet.getNodeExceptSelf()){
+            ++count;
+//            //如果节点不存活，直接跳过，省去等待时间
+//            if(nodeInfo.isAlive()){
+//                continue;
+//            }
+
+            futureList.add(replication(nodeInfo,logEntry));
+        }
+
+        CountDownLatch latch = new CountDownLatch(futureList.size());
+        List<Boolean> resultList = new CopyOnWriteArrayList<>();
+
+        try {
+            latch.await(4000, MILLISECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        //成功复制的数量
+        for (Boolean aBoolean : resultList) {
+            if (aBoolean) {
+                success.incrementAndGet();
+            }
+        }
+
+        // 如果存在一个满足N > commitIndex的 N，并且大多数的matchIndex[i] ≥ N成立，
+        // 并且log[N].term == currentTerm成立，那么令 commitIndex 等于这个 N （5.3 和 5.4 节）
+        List<Long> matchIndexList = new ArrayList<>(matchIndexs.values());
+        // 小于 2, 没有意义
+        int median = 0;
+        if (matchIndexList.size() >= 2) {
+            Collections.sort(matchIndexList);
+            median = matchIndexList.size() >> 1;
+        }
+        Long N = matchIndexList.get(median);
+        if (N > commitIndex) {
+            LogEntry entry = raftLogManager.read(N);
+            if (entry != null && entry.getTerm() == currentTerm) {
+                commitIndex = N;
+            }
+        }
+
+        //  响应客户端(成功一半)
+        if (success.get() >= (count >> 1)) {
+            // 更新
+            commitIndex = logEntry.getIndex();
+//            //  应用到状态机
+//            getStateMachine().apply(logEntry);
+            lastApplied = commitIndex;
+
+            LOGGER.info("success apply local state machine,  logEntry info : {}", logEntry);
+            // 返回成功.
+            return true;
+        } else {
+            // 回滚已经提交的日志.
+            raftLogManager.removeOnStartIndex(logEntry.getIndex());
+            LOGGER.warn("fail apply local state  machine,  logEntry info : {}", logEntry);
+            // TODO 不应用到状态机,但已经记录到日志中.由定时任务从重试队列取出,然后重复尝试,当达到条件时,应用到状态机.
+            // 这里应该返回错误, 因为没有成功复制过半机器.
+            return false;
+        }
+
+    }
+
+    /**
+     * 复制日志到其他机器
+     * @param nodeInfo
+     * @param logEntry
+     * @return
+     */
+    private Future<Boolean> replication(NodeInfo nodeInfo, LogEntry logEntry) {
+        return RaftThreadPool.submit(() -> {
+            long start = System.currentTimeMillis(), end = start;
+            // 10 秒重试时间
+            while (end - start < 10 * 1000L) {
+                AppendLogRequest appendLogRequest=new AppendLogRequest();
+                appendLogRequest.setLeaderId(nodeInfoSet.getSelf().getId());
+                appendLogRequest.setTerm(currentTerm);
+                appendLogRequest.setLeaderCommit(commitIndex);
+
+                // 以我这边为准, 这个行为通常是成为 leader 后,首次进行 RPC 才有意义.
+                Long nextIndex = nextIndexs.get(nodeInfo);
+                LinkedList<LogEntry> logEntries = new LinkedList<>();
+                if (logEntry.getIndex() >= nextIndex) {
+                    for (long i = nextIndex; i <= logEntry.getIndex(); i++) {
+                        LogEntry l = raftLogManager.read(i);
+                        if (l != null) {
+                            logEntries.add(l);
+                        }
+                    }
+                } else {
+                    logEntries.add(logEntry);
+                }
+                // 最小的那个日志.
+                LogEntry preLog = logEntries.getFirst();
+                appendLogRequest.setEntries(logEntries.toArray(new LogEntry[0]));
+                appendLogRequest.setPreLogTerm(preLog.getTerm());
+                appendLogRequest.setPrevLogIndex(preLog.getIndex());
+                try {
+                    //通过心跳任务去获取别人的任期，从而加强一致性
+                    JsonResult response = networkService.post(nodeInfo.getIp(),
+                            nodeInfo.getPort(), appendLogRequest);
+                    if (response == null) {
+                        return false;
+                    }
+                    ObjectMapper mapper = new ObjectMapper();
+                    AppendLogResult result = mapper.convertValue(response.getData(), AppendLogResult.class);
+
+                    if (result != null && result.isSuccess()) {
+                        LOGGER.info("append follower entry success , follower=[{}], entry=[{}]", nodeInfo, appendLogRequest.getEntries());
+                        // update 这两个追踪值
+                        nextIndexs.put(nodeInfo, logEntry.getIndex() + 1);
+                        matchIndexs.put(nodeInfo, logEntry.getIndex());
+                        return true;
+                    } else if (result != null) {
+                        // 对方比我大
+                        if (result.getTerm() > currentTerm) {
+                            LOGGER.warn("follower [{}] term [{}]  more than self, and my term = [{}]," +
+                                            " so, I will become follower",
+                                    nodeInfo, result.getTerm(), currentTerm);
+                            currentTerm = result.getTerm();
+                            // 对方的任期比我大，则我成为跟随者。
+                            status = NodeStatus.FOLLOWER;
+                            return false;
+                        } // 没我大, 却失败了,说明 index 不对.或者 term 不对.
+                        else {
+                            // 递减
+                            if (nextIndex == 0) {
+                                nextIndex = 1L;
+                            }
+                            nextIndexs.put(nodeInfo, nextIndex - 1);
+                            LOGGER.warn("follower {} nextIndex not match, will reduce nextIndex and retry request" +
+                                            "append, nextIndex : [{}]", nodeInfo.getId(),
+                                    nextIndex);
+                            // 重来, 直到成功.
+                        }
+                    }
+
+                    end = System.currentTimeMillis();
+
+                } catch (Exception e) {
+                    LOGGER.warn(e.getMessage(), e);
+                    // TODO 要不要放队列重试
+//                        ReplicationFailModel model =  ReplicationFailModel.newBuilder()
+//                            .callable(this)
+//                            .logEntry(entry)
+//                            .peer(peer)
+//                            .offerTime(System.currentTimeMillis())
+//                            .build();
+//                        replicationFailQueue.offer(model);
+                    return false;
+                }
+            }
+            // 超时了,没办法了
+            return false;
+        });
+    }
+
+
+    private LogEntry buildLogEntry(long currentTerm, String data, long index) {
+        LogEntry logEntry=new LogEntry();
+        logEntry.setData(data);
+        logEntry.setTerm(currentTerm);
+        logEntry.setIndex(index);
+        return logEntry;
+    }
+
+    /**
      * 心跳任务，用来检测follower节点是否存活，交换信息
      */
     class HeartBeatTask implements Runnable {
@@ -143,8 +326,8 @@ public class BlockChainNode extends DefaultNode {
                         //通过心跳任务去获取别人的任期，从而加强一致性
                         JsonResult response = networkService.post(node.getIp(),
                                 node.getPort(), appendLogRequest);
-                        ObjectMapper mapper=new ObjectMapper();
-                        AppendLogResult heartBeatResult=mapper.convertValue(response.getData(), AppendLogResult.class);
+                        ObjectMapper mapper = new ObjectMapper();
+                        AppendLogResult heartBeatResult = mapper.convertValue(response.getData(), AppendLogResult.class);
 
                         long term = heartBeatResult.getTerm();
 
@@ -154,13 +337,14 @@ public class BlockChainNode extends DefaultNode {
                             currentTerm = currentTerm;
                             votedFor = "";
                             status = NodeStatus.FOLLOWER;
+                            node.setAlive(true);
                         }
                     } catch (Exception e) {
                         //发生网络故障，说明该节点暂时不存活了
                         //TODO 是否需要这一步进行判断节点情况
-                        synchronized (node) {
-                            node.setAlive(false);
-                        }
+
+                        node.setAlive(false);
+
                         LOGGER.error("HeartBeatTask  Fail, request node : {}:{}", node.getIp(),
                                 node.getPort());
                     }
@@ -230,9 +414,9 @@ public class BlockChainNode extends DefaultNode {
                     }
                     try {
                         JsonResult<VoteResult> response = networkService.post(node.getIp(), node.getPort(), voteRequest);
-                        ObjectMapper mapper=new ObjectMapper();
+                        ObjectMapper mapper = new ObjectMapper();
 
-                        VoteResult result=mapper.convertValue(response.getData(), VoteResult.class);
+                        VoteResult result = mapper.convertValue(response.getData(), VoteResult.class);
                         return result;
 
                     } catch (Exception e) {
