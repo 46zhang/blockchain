@@ -138,6 +138,20 @@ public class BlockChainNode extends DefaultNode {
         CountDownLatch latch = new CountDownLatch(futureList.size());
         List<Boolean> resultList = new CopyOnWriteArrayList<>();
 
+        //执行future
+        for (Future<Boolean> future : futureList) {
+            RaftThreadPool.execute(() -> {
+                try {
+                    resultList.add(future.get(3000, MILLISECONDS));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    resultList.add(false);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
         try {
             latch.await(4000, MILLISECONDS);
         } catch (InterruptedException e) {
