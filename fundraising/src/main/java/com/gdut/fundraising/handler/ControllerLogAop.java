@@ -1,5 +1,7 @@
 package com.gdut.fundraising.handler;
 
+import com.gdut.fundraising.dto.raft.AppendLogRequest;
+import com.gdut.fundraising.dto.raft.VoteRequest;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
@@ -34,13 +36,13 @@ public class ControllerLogAop {
 
         // 记录下请求内容
         //打印空行方便阅读
-
-        logger.info("--------------->日志打印ing<------------- : ");
-        logger.info("---->请求URL : " + request.getRequestURL().toString());
-        logger.info("---->HTTP方法 : " + request.getMethod());
-        logger.info("IP : " + request.getRemoteAddr());
-        logger.info("---->方法名 : " + joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName());
-        logger.info("---->参数值 : " + Arrays.toString(joinPoint.getArgs()));
+//
+//        logger.info("--------------->日志打印ing<------------- : ");
+//        logger.info("---->请求URL : " + request.getRequestURL().toString());
+//        logger.info("---->HTTP方法 : " + request.getMethod());
+//        logger.info("IP : " + request.getRemoteAddr());
+//        logger.info("---->方法名 : " + joinPoint.getSignature().getDeclaringTypeName() + "." + joinPoint.getSignature().getName());
+//        logger.info("---->参数值 : " + Arrays.toString(joinPoint.getArgs()));
 
     }
 

@@ -44,11 +44,11 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
             if (param.getTerm() < node.getCurrentTerm()) {
                 return VoteResult.fail(node.getCurrentTerm());
             }
-
-            LOGGER.info("node {} current vote for [{}], param candidateId : {}", node.getNodeInfoSet().getSelf(),
-                    node.getVotedFor(), param.getCandidateId());
-            LOGGER.info("node {} current term {}, peer term : {}", node.getNodeInfoSet().getSelf(),
-                    node.getCurrentTerm(), param.getTerm());
+            //TODO 先屏蔽注释，方便查看
+//            LOGGER.info("node {} current vote for [{}], param candidateId : {}", node.getNodeInfoSet().getSelf(),
+//                    node.getVotedFor(), param.getCandidateId());
+//            LOGGER.info("node {} current term {}, peer term : {}", node.getNodeInfoSet().getSelf(),
+//                    node.getCurrentTerm(), param.getTerm());
             // (当前节点并没有投票 或者 已经投票过了且是对方节点) && 对方日志和自己一样新
             if ((StringUtils.isEmpty(node.getVotedFor()) || node.getVotedFor().equals(param.getCandidateId()))) {
 
@@ -63,7 +63,7 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
                     }
                 }
                 //更新node状态
-                updateNode(param,node);
+                updateNode(param, node);
                 // 返回成功
                 return VoteResult.ok(node.getCurrentTerm());
             }
@@ -77,6 +77,7 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
 
     /**
      * 添加日志
+     *
      * @param param
      * @param node
      * @return
@@ -94,7 +95,7 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
             if (param.getTerm() < node.getCurrentTerm()) {
                 return result;
             }
-           final NodeInfoSet nodeInfoSet=node.getNodeInfoSet();
+            final NodeInfoSet nodeInfoSet = node.getNodeInfoSet();
             /**
              * 更新心跳时间
              */
@@ -130,6 +131,8 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
                     }
                 } else {
                     // index 不对, 需要递减 nextIndex 重试.
+                    LOGGER.info("index error need to reduce nextIndex now nextIndex: {}, own last log index: {}",
+                            param.getPrevLogIndex(), node.getRaftLogManager().getLastLogIndex());
                     return result;
                 }
 
@@ -139,18 +142,26 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
             LogEntry existLog = node.getRaftLogManager().read(((param.getPrevLogIndex() + 1)));
             if (existLog != null && existLog.getTerm() != param.getEntries()[0].getTerm()) {
                 // 删除这一条和之后所有的, 然后写入日志和状态机.
+                LOGGER.info("delete log entry because index are different from leader leader: {}, own: {}",
+                       param, existLog);
                 node.getRaftLogManager().removeOnStartIndex(param.getPrevLogIndex() + 1);
-            } else if (existLog != null) {
-                // 已经有日志了, 不能重复写入.
-                //TODO 只判断前一日志索引值跟任期是否一致就说明日志已经存在是否不妥
-                // 万一有日志写入一半就挂了，可能导致后面的日志丢失
-                result.setSuccess(true);
-                return result;
             }
+//            else if (existLog != null) {
+//                // 已经有日志了, 不能重复写入.
+//                //TODO 只判断前一日志索引值跟任期是否一致就说明日志已经存在是否不妥
+//                // 万一有日志写入一半就挂了，可能导致后面的日志丢失
+//                result.setSuccess(true);
+//                return result;
+//            }
 
             // 写进日志并且应用到状态机
             for (LogEntry entry : param.getEntries()) {
-                boolean res= node.getRaftLogManager().write(entry);
+                boolean res = node.getRaftLogManager().write(entry);
+                //写入日志失败
+                if (!res) {
+                    LOGGER.error("write data to log fail!! log: {}",entry);
+                    return result;
+                }
                 //暂时不用状态机
                 //node.stateMachine.apply(entry);
                 result.setSuccess(true);
@@ -180,6 +191,7 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
      * <p>更新新一轮的选举时间</p>
      * <p>更新leader</p>
      * <p>更新任期</p>
+     *
      * @param param
      * @param node
      */

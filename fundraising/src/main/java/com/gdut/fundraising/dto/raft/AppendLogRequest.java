@@ -29,12 +29,13 @@ public class AppendLogRequest extends Request {
      */
     private long leaderCommit;
 
-    public AppendLogRequest(){
+    public AppendLogRequest() {
 
     }
 
     /**
      * 追加日志的请求
+     *
      * @param leaderId
      * @param prevLogIndex
      * @param preLogTerm
@@ -42,31 +43,44 @@ public class AppendLogRequest extends Request {
      * @param leaderCommit
      * @param term
      */
-    public AppendLogRequest(String leaderId,long prevLogIndex,long preLogTerm,LogEntry[] entries,long leaderCommit,long term){
-        this.leaderId=leaderId;
-        this.prevLogIndex=prevLogIndex;
-        this.preLogTerm=preLogTerm;
-        this.entries=entries;
-        this.leaderCommit=leaderCommit;
+    public AppendLogRequest(String leaderId, long prevLogIndex, long preLogTerm, LogEntry[] entries, long leaderCommit, long term) {
+        this.leaderId = leaderId;
+        this.prevLogIndex = prevLogIndex;
+        this.preLogTerm = preLogTerm;
+        this.entries = entries;
+        this.leaderCommit = leaderCommit;
         this.setTerm(term);
         this.setType(MessageType.APPEND_LOG.getValue());
     }
 
     /**
      * 心跳包，日志为空
+     *
      * @param leaderId
      * @param prevLogIndex
      * @param preLogTerm
      * @param term
      */
-    public AppendLogRequest(String leaderId,long prevLogIndex,long preLogTerm,long term){
-        this.leaderId=leaderId;
-        this.prevLogIndex=prevLogIndex;
-        this.preLogTerm=preLogTerm;
-        this.entries=null;
-        this.leaderCommit=0L;
+    public AppendLogRequest(String leaderId, long prevLogIndex, long preLogTerm, long term) {
+        this.leaderId = leaderId;
+        this.prevLogIndex = prevLogIndex;
+        this.preLogTerm = preLogTerm;
+        this.entries = null;
+        this.leaderCommit = 0L;
         this.setTerm(term);
         this.setType(MessageType.APPEND_LOG.getValue());
+    }
+
+    @Override
+    public String toString() {
+        return "AppendLogRequest{" +
+                "leaderId='" + leaderId + '\'' +
+                ", prevLogIndex=" + prevLogIndex + '\'' +
+                "preLogTerm='" + preLogTerm + '\'' +
+                "entries='" + entries + '\'' +
+                "leaderCommit='" + leaderCommit +
+
+                '}';
     }
 
     public String getLeaderId() {

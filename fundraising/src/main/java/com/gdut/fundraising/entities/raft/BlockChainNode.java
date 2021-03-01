@@ -1,6 +1,7 @@
 package com.gdut.fundraising.entities.raft;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gdut.fundraising.constant.raft.MessageType;
 import com.gdut.fundraising.constant.raft.NodeStatus;
 import com.gdut.fundraising.dto.raft.AppendLogRequest;
 import com.gdut.fundraising.dto.raft.AppendLogResult;
@@ -74,6 +75,13 @@ public class BlockChainNode extends DefaultNode {
             }
         }
         this.setNodeInfoSet(nodeInfoSet);
+        //调试用
+        nextIndexs = new ConcurrentHashMap<>();
+        matchIndexs = new ConcurrentHashMap<>();
+        for (NodeInfo node : nodeInfoSet.getNodeExceptSelf()) {
+            nextIndexs.put(node, 1L);
+            matchIndexs.put(node, 0L);
+        }
     }
 
     /**
@@ -109,9 +117,9 @@ public class BlockChainNode extends DefaultNode {
      * @param data
      * @return
      */
-    public boolean sendLogToOtherNodeForConsistency(String data){
+    public boolean sendLogToOtherNodeForConsistency(Test data){
         //构建索引
-        LogEntry logEntry=buildLogEntry(currentTerm,data,raftLogManager.getLastLogIndex()+1);
+        LogEntry logEntry=buildLogEntry(currentTerm,data.getData(),raftLogManager.getLastLogIndex()+1);
         //下面采用原子量进行复制的统计
         final AtomicInteger success = new AtomicInteger(0);
         //异步
@@ -130,12 +138,11 @@ public class BlockChainNode extends DefaultNode {
         int count=0;
         //给每个节点同步数据
         for(NodeInfo nodeInfo:nodeInfoSet.getNodeExceptSelf()){
-            ++count;
-//            //如果节点不存活，直接跳过，省去等待时间
-//            if(nodeInfo.isAlive()){
+            //如果节点不存活，直接跳过，省去等待时间
+//            if(!nodeInfo.isAlive()){
 //                continue;
 //            }
-
+            ++count;
             futureList.add(replication(nodeInfo,logEntry));
         }
 
@@ -186,7 +193,7 @@ public class BlockChainNode extends DefaultNode {
         }
 
         //  响应客户端(成功一半)
-        if (success.get() >= (count >> 1)) {
+        if (success.get() >= (nodeInfoSet.getAll().size() >> 1)) {
             // 更新
             commitIndex = logEntry.getIndex();
 //            //  应用到状态机
@@ -241,8 +248,8 @@ public class BlockChainNode extends DefaultNode {
                 appendLogRequest.setEntries(logEntries.toArray(new LogEntry[0]));
                 appendLogRequest.setPreLogTerm(preLog.getTerm());
                 appendLogRequest.setPrevLogIndex(preLog.getIndex());
+                appendLogRequest.setType(MessageType.APPEND_LOG.getValue());
                 try {
-                    //通过心跳任务去获取别人的任期，从而加强一致性
                     JsonResult response = networkService.post(nodeInfo.getIp(),
                             nodeInfo.getPort(), appendLogRequest);
                     if (response == null) {
@@ -355,8 +362,8 @@ public class BlockChainNode extends DefaultNode {
                             currentTerm = currentTerm;
                             votedFor = "";
                             status = NodeStatus.FOLLOWER;
-                            node.setAlive(true);
                         }
+                        node.setAlive(true);
                     } catch (Exception e) {
                         //发生网络故障，说明该节点暂时不存活了
                         //TODO 是否需要这一步进行判断节点情况

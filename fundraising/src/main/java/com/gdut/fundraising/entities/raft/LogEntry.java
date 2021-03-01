@@ -8,6 +8,15 @@ public class LogEntry {
 
     String data;
 
+    @Override
+    public String toString() {
+        return "LogEntry{" +
+                "index='" + index + '\'' +
+                ", term=" + term + '\'' +
+                "data='" + data +
+                '}';
+    }
+
     public long getIndex() {
         return index;
     }

@@ -35,6 +35,14 @@ public class AppendLogResult {
         this.success = success;
     }
 
+    @Override
+    public String toString() {
+        return "AppendLogResult{" +
+                "term='" + term + '\'' +
+                ", success=" + success +
+                '}';
+    }
+
     public static AppendLogResult fail(long term) {
         return new AppendLogResult(term, false);
     }

@@ -58,7 +58,6 @@ public class FileUtils {
             writer.flush();// 把缓存区内容压入文件
             return true;
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         } finally {
             if (writer != null) {

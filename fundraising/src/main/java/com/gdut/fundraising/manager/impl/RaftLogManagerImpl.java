@@ -4,7 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.gdut.fundraising.entities.raft.LogEntry;
 import com.gdut.fundraising.manager.RaftLogManager;
 import com.gdut.fundraising.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
@@ -13,6 +17,7 @@ import java.util.Properties;
  */
 public class RaftLogManagerImpl implements RaftLogManager {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(RaftLogManagerImpl.class);
     /**
      * 路径名
      */
@@ -21,16 +26,18 @@ public class RaftLogManagerImpl implements RaftLogManager {
     /**
      * 日志列表
      */
-    private List<LogEntry> logEntries;
+    LinkedList<LogEntry> logEntries;
 
     public RaftLogManagerImpl() {
         Properties props = System.getProperties(); //系统属性
         String port = (String) props.get("port");
         //根据不同系统构建文件路径
         pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port);
+        logEntries = new LinkedList<>();
         //创建文件夹，该函数有做幂等操作，如果文件夹已存在则直接返回true
         FileUtils.createDir(pathName);
         loadAllLog();
+        LOGGER.info("log manager init success!!");
     }
 
     /**
@@ -49,65 +56,81 @@ public class RaftLogManagerImpl implements RaftLogManager {
 
     /**
      * 获取日志索引
+     *
      * @return
      */
     @Override
     public long getLastLogIndex() {
+        if (logEntries.size() == 0) {
+            return 0;
+        }
         LogEntry logEntry = logEntries.get(logEntries.size() - 1);
         return logEntry.getIndex();
     }
 
     /**
      * 获取最后一个日志
+     *
      * @return
      */
     @Override
     public LogEntry getLastLogEntry() {
+        if (null == logEntries || logEntries.size() == 0) {
+            return null;
+        }
         LogEntry logEntry = logEntries.get(logEntries.size() - 1);
         return logEntry;
     }
 
     /**
      * 获取最后日志的任期
+     *
      * @return
      */
     @Override
     public long getLsatLogTerm() {
+        if (logEntries.size() == 0) {
+            return 0;
+        }
         LogEntry logEntry = logEntries.get(logEntries.size() - 1);
         return logEntry.getTerm();
     }
 
     /**
      * 读取文件
+     *
      * @param index
      * @return
      */
     @Override
     public LogEntry read(long index) {
-        if (index < logEntries.size()) {
-            return logEntries.get((int) index);
+        if (index <= logEntries.size()) {
+            return logEntries.get((int) index-1);
         }
         return null;
     }
 
     /**
      * 从index开始删除日志
+     *
      * @param l
      */
     @Override
     public void removeOnStartIndex(long l) {
-        if(l<logEntries.size()){
-            //TODO long 直接转int可能存在数据溢出风险
-           for(int i = (int) l; i<logEntries.size(); ++i){
-               logEntries.remove(i);
-               FileUtils.deleteFile(FileUtils.buildPath(pathName, String.valueOf(i) + ".json"));
-           }
+        if (l <= logEntries.size()) {
+            while (logEntries.size() >= l) {
+                FileUtils.deleteFile(FileUtils.buildPath(pathName,
+                        String.valueOf(logEntries.getLast().getIndex()) + ".json"));
+                logEntries.removeLast();
+            }
+
         }
 
     }
 
     /**
      * 写入数据
+     *
      * @param entry
      * @return
      */
