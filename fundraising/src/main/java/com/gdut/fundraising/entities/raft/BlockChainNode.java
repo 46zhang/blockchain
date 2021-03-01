@@ -120,7 +120,11 @@ public class BlockChainNode extends DefaultNode {
         // 预提交到本地日志
         //here write ahead log(my local log)
         //如果后面发生日志复制达不到一半的条件，则执行撤销
-        raftLogManager.write(logEntry);
+        boolean res= raftLogManager.write(logEntry);
+        if(!res){
+            LOGGER.info("write logModule fail, logEntry info : {}, log index : {}", logEntry, logEntry.getIndex());
+            return false;
+        }
         LOGGER.info("write logModule success, logEntry info : {}, log index : {}", logEntry, logEntry.getIndex());
 
         int count=0;

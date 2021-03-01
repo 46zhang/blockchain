@@ -13,5 +13,5 @@ public interface RaftLogManager {
 
     void removeOnStartIndex(long l);
 
-    void write(LogEntry entry);
+    boolean write(LogEntry entry);
 }

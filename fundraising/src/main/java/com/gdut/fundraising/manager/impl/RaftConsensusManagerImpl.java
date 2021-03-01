@@ -142,13 +142,15 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
                 node.getRaftLogManager().removeOnStartIndex(param.getPrevLogIndex() + 1);
             } else if (existLog != null) {
                 // 已经有日志了, 不能重复写入.
+                //TODO 只判断前一日志索引值跟任期是否一致就说明日志已经存在是否不妥
+                // 万一有日志写入一半就挂了，可能导致后面的日志丢失
                 result.setSuccess(true);
                 return result;
             }
 
             // 写进日志并且应用到状态机
             for (LogEntry entry : param.getEntries()) {
-                node.getRaftLogManager().write(entry);
+                boolean res= node.getRaftLogManager().write(entry);
                 //暂时不用状态机
                 //node.stateMachine.apply(entry);
                 result.setSuccess(true);
