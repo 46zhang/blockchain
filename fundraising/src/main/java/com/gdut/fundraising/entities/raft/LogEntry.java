@@ -1,12 +1,14 @@
 package com.gdut.fundraising.entities.raft;
 
+import com.gdut.fundraising.blockchain.Block;
+
 public class LogEntry {
     //索引
     long index;
 
     long term;
 
-    String data;
+    Block data;
 
     @Override
     public String toString() {
@@ -25,11 +27,11 @@ public class LogEntry {
         this.index = index;
     }
 
-    public String getData() {
+    public Block getData() {
         return data;
     }
 
-    public void setData(String data) {
+    public void setData(Block data) {
         this.data = data;
     }
 

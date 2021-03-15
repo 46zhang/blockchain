@@ -1,6 +1,7 @@
 package com.gdut.fundraising.entities.raft;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gdut.fundraising.blockchain.Block;
 import com.gdut.fundraising.blockchain.Peer;
 import com.gdut.fundraising.blockchain.Transaction;
 import com.gdut.fundraising.constant.raft.MessageType;
@@ -14,7 +15,7 @@ import com.gdut.fundraising.manager.impl.RaftLogManagerImpl;
 import com.gdut.fundraising.service.impl.NetworkServiceImpl;
 import com.gdut.fundraising.task.RaftThreadPool;
 import com.gdut.fundraising.util.JsonResult;
-import com.gdut.fundraising.util.NetworkUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -127,9 +128,9 @@ public class BlockChainNode extends DefaultNode {
      * @param data
      * @return
      */
-    public boolean sendLogToOtherNodeForConsistency(Test data) {
+    public boolean sendLogToOtherNodeForConsistency(Block data) {
         //构建索引
-        LogEntry logEntry = buildLogEntry(currentTerm, data.getData(), raftLogManager.getLastLogIndex() + 1);
+        LogEntry logEntry = buildLogEntry(currentTerm, data, raftLogManager.getLastLogIndex() + 1);
         //下面采用原子量进行复制的统计
         final AtomicInteger success = new AtomicInteger(0);
         //异步
@@ -337,7 +338,7 @@ public class BlockChainNode extends DefaultNode {
     }
 
 
-    private LogEntry buildLogEntry(long currentTerm, String data, long index) {
+    private LogEntry buildLogEntry(long currentTerm, Block data, long index) {
         LogEntry logEntry = new LogEntry();
         logEntry.setData(data);
         logEntry.setTerm(currentTerm);
