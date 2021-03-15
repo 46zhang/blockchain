@@ -21,7 +21,7 @@ public class GiftTblEntity {
     /**
      * 募捐的钱数
      */
-    private double giftMoney;
+    private long giftMoney;
     /**
      * 募捐对应项目的id
      */

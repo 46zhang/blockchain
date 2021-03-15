@@ -2,6 +2,7 @@ package com.gdut.fundraising.controller.user;
 
 import com.gdut.fundraising.entities.ProjectTblEntity;
 import com.gdut.fundraising.entities.UserTblEntity;
+import com.gdut.fundraising.entities.raft.BlockChainNode;
 import com.gdut.fundraising.exception.BaseException;
 import com.gdut.fundraising.service.UserService;
 import com.gdut.fundraising.util.JsonResult;
@@ -17,6 +18,9 @@ import java.util.Map;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private BlockChainNode blockChainNode;
 
     @PostMapping("/**")
     public Map notFound() throws BaseException {
@@ -37,6 +41,7 @@ public class UserController {
     public Map launch(@RequestHeader("AUTHORIZATION")String token,  @RequestBody ProjectTblEntity projectTblEntity) throws BaseException {
         return JsonResult.success(userService.launch(token.substring(7), projectTblEntity)).result();
     }
+
     @RequestMapping("/uploadPhoto")
     public Map uploadAvatar(@RequestHeader("AUTHORIZATION")String token, @RequestParam("photo") MultipartFile file) throws BaseException {
 

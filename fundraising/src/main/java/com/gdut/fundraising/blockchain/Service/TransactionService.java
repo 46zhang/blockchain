@@ -29,7 +29,7 @@ public interface TransactionService {
      * @param transaction
      * @return
      */
-    public boolean verifyTransaction(Peer peer, Transaction transaction);
+    boolean verifyTransaction(Peer peer, Transaction transaction);
 
     /**
      * 创币服务
@@ -39,7 +39,7 @@ public interface TransactionService {
      * @param money
      * @return
      */
-    Transaction createCoinBaseTransaction(Peer peer, String toAddress, long money);
+    Transaction createCoinBaseTransaction(Peer peer, String toAddress, String userId, String projectId, long money);
 
     /**
      * 从交易中找到对应的输入单元的指针
@@ -76,10 +76,18 @@ public interface TransactionService {
 
     /**
      * 从交易池中移除交易
+     *
      * @param pool
      * @param txs
      * @return
      */
     HashMap<String, Transaction> removeTransactionFromTransactionPool(HashMap<String, Transaction> pool,
                                                                       List<Transaction> txs);
+
+    /**
+     *
+     * @param peer
+     * @param t
+     */
+    void addTransaction(Peer peer, Transaction t);
 }

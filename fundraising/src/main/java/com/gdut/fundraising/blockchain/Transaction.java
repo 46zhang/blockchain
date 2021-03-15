@@ -21,28 +21,39 @@ public class Transaction {
     /**
      * 手续费,分为单元
      */
-    long fee;
+    private long fee;
 
     /**
      * 交易编号
      */
-    String id;
+    private String id;
 
     /**
      * 是否是创币交易
      */
-    boolean isCoinBase;
+    private boolean isCoinBase;
 
-    Date lockTime;
+    /**
+     * 项目id
+     */
+    private String formProjectId;
 
-    public Transaction(){
-        inList=new ArrayList<>();
-        outList=new ArrayList<>();
+    /**
+     * 用户id
+     */
+    private String fromUserId;
+
+
+    private Date lockTime;
+
+    public Transaction() {
+        inList = new ArrayList<>();
+        outList = new ArrayList<>();
     }
 
     @Override
     public String toString() {
-        return String.valueOf(fee)+isCoinBase+inList.toString()+outList.toString();
+        return String.valueOf(fee) + isCoinBase + inList.toString() + outList.toString();
     }
 
     public List<Vin> getInList() {
@@ -91,5 +102,21 @@ public class Transaction {
 
     public void setLockTime(Date lockTime) {
         this.lockTime = lockTime;
+    }
+
+    public String getFormProjectId() {
+        return formProjectId;
+    }
+
+    public void setFormProjectId(String formProjectId) {
+        this.formProjectId = formProjectId;
+    }
+
+    public String getFromUserId() {
+        return fromUserId;
+    }
+
+    public void setFromUserId(String fromUserId) {
+        this.fromUserId = fromUserId;
     }
 }

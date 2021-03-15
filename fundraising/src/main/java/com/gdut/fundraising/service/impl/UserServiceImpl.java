@@ -7,11 +7,14 @@ import com.gdut.fundraising.dto.ReadListResult;
 import com.gdut.fundraising.entities.GiftTblEntity;
 import com.gdut.fundraising.entities.ProjectTblEntity;
 import com.gdut.fundraising.entities.UserTblEntity;
+import com.gdut.fundraising.entities.raft.BlockChainNode;
 import com.gdut.fundraising.exception.BaseException;
 import com.gdut.fundraising.mapper.UserMapper;
+import com.gdut.fundraising.service.BlockChainService;
 import com.gdut.fundraising.service.UserService;
 import com.gdut.fundraising.util.TokenUtil;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,6 +39,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     UserMapper userMapper;
+
+    @Autowired
+    private BlockChainService blockChainService;
 
 
     public Map<String, Object> register(UserTblEntity userTblEntity)   {
@@ -190,8 +196,9 @@ public class UserServiceImpl implements UserService {
             if(userMapper.contributionUpdateProject(gift.getGiftMoney(),gift.getProjectId()) != 1){
                 throw new BaseException(400, "项目未找到或项目不在募捐状态！");
             }
-            //插入捐款记录
-            userMapper.contributionUpdateGiftTbl(gift);
+            blockChainService.contribution(gift.getUserId(),gift.getProjectId(), gift.getGiftMoney());
+            //不需要插入捐款记录到数据库
+            //userMapper.contributionUpdateGiftTbl(gift);
             Map<String, Object> ret = new HashMap<>();
             ret.put("money", gift.getGiftMoney());
             return ret;
@@ -200,6 +207,8 @@ public class UserServiceImpl implements UserService {
             throw new BaseException(400, "token认证失败！");
         }
     }
+
+
 
     public List<ReadDonationResult> readDonation(String projectId){
         return userMapper.readDonation(projectId);

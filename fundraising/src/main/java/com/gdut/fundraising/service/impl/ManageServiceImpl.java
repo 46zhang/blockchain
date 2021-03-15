@@ -4,11 +4,14 @@ package com.gdut.fundraising.service.impl;
 import com.gdut.fundraising.dto.ReadListResult;
 import com.gdut.fundraising.entities.OrderTblEntity;
 import com.gdut.fundraising.entities.ProjectTblEntity;
+import com.gdut.fundraising.entities.SpendEntity;
 import com.gdut.fundraising.entities.UserTblEntity;
 import com.gdut.fundraising.exception.BaseException;
 import com.gdut.fundraising.mapper.ManageMapper;
+import com.gdut.fundraising.service.BlockChainService;
 import com.gdut.fundraising.service.ManageService;
 import com.gdut.fundraising.service.ProjectMachineService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -19,6 +22,8 @@ import java.util.*;
 @Service
 public class ManageServiceImpl implements ManageService {
 
+    @Autowired
+    BlockChainService blockChainService;
 
     @Resource
     ManageMapper manageMapper;
@@ -124,6 +129,32 @@ public class ManageServiceImpl implements ManageService {
                 throw new BaseException(500, "服务器存储数据出错！");
             }
             return orderTblEntity;
+        }
+        else{
+            throw new BaseException(400, "token认证失败！");
+        }
+    }
+
+    /**
+     * 花费金额
+     * @param token
+     * @param spendEntity
+     * @return
+     */
+    public SpendEntity spend(String token, SpendEntity spendEntity) {
+        UserTblEntity userTblEntity = manageMapper.selectUserByToken(token);
+        if (userTblEntity != null && userTblEntity.getUserId().length() >= 4 && "root".equals(userTblEntity.getUserId().substring(0, 4))){
+            spendEntity.setOrderOperator(userTblEntity.getUserId());
+
+            if(spendEntity.getMoney() <= 0){
+                throw new BaseException(400, "支出的金钱不可小于等于零！");
+            }
+
+            boolean res= blockChainService.useMoney(spendEntity);
+            if(!res){
+                throw  new BaseException(400,"区块链服务存在异常!");
+            }
+            return spendEntity;
         }
         else{
             throw new BaseException(400, "token认证失败！");

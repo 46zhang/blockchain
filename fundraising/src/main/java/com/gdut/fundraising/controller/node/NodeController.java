@@ -1,5 +1,6 @@
 package com.gdut.fundraising.controller.node;
 
+import com.gdut.fundraising.blockchain.Transaction;
 import com.gdut.fundraising.dto.raft.AppendLogRequest;
 import com.gdut.fundraising.dto.raft.VoteRequest;
 import com.gdut.fundraising.entities.raft.BlockChainNode;
@@ -8,6 +9,8 @@ import com.gdut.fundraising.util.JsonResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+
+import java.util.List;
 import java.util.Map;
 
 @ControllerAdvice
@@ -16,6 +19,7 @@ import java.util.Map;
 public class NodeController {
     @Autowired
     BlockChainNode node;
+
 
     /**
      * 添加日志
@@ -44,6 +48,17 @@ public class NodeController {
      */
     @PostMapping("/send")
     public Map send(@RequestBody Test data){
+        return JsonResult.success(node.sendLogToOtherNodeForConsistency(data)).result();
+    }
+
+
+    /**
+     * leader节点接受其他节点
+     * @param data
+     * @return
+     */
+    @PostMapping("/broadcast")
+    public Map consistence(@RequestBody List<Transaction> data){
         return JsonResult.success(node.sendLogToOtherNodeForConsistency(data)).result();
     }
 }

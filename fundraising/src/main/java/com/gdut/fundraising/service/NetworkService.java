@@ -6,4 +6,5 @@ import com.gdut.fundraising.util.JsonResult;
 public interface NetworkService {
     public <R extends Request> JsonResult post(String ip, String port, R data);
 
+    public <R> JsonResult post(String url,  R data);
 }

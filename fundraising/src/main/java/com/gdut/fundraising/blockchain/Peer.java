@@ -1,5 +1,10 @@
 package com.gdut.fundraising.blockchain;
 
+import com.gdut.fundraising.blockchain.Service.BlockChainService;
+import com.gdut.fundraising.blockchain.Service.TransactionService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -8,6 +13,7 @@ import java.util.List;
 /**
  * 区块链节点
  */
+@Component
 public class Peer {
 
     /**
@@ -19,12 +25,6 @@ public class Peer {
      * utxo 哈希集
      */
     private HashMap<Pointer, UTXO> UTXOHashMap;
-
-//    /**
-//     * 用户自身的utxo，方便计算余额
-//     */
-//    private HashMap<Pointer, UTXO> ownUTXOHashMap;
-
 
     /**
      * 钱包
@@ -40,7 +40,6 @@ public class Peer {
      * 交易池
      */
     private HashMap<String, Transaction> transactionPool;
-
 
     /**
      * utxo 哈希集备份
@@ -67,6 +66,19 @@ public class Peer {
      */
     private List<UTXO> utxosFromVout;
 
+    /**
+     * 区块链服务
+     */
+    @Autowired
+    private BlockChainService blockChainService;
+
+    /**
+     * 交易服务
+     */
+    @Autowired
+    private TransactionService transactionService;
+
+
     public Peer() {
         UTXOHashMap = new HashMap<>();
         orphanPool = new HashMap<>();
@@ -86,6 +98,7 @@ public class Peer {
         }
         return money;
     }
+
 
 
     public List<Block> getBlockChain() {
@@ -159,5 +172,29 @@ public class Peer {
 
     public void setPointersFromVout(List<Pointer> pointersFromVout) {
         this.pointersFromVout = pointersFromVout;
+    }
+
+    public List<UTXO> getUtxosFromVout() {
+        return utxosFromVout;
+    }
+
+    public void setUtxosFromVout(List<UTXO> utxosFromVout) {
+        this.utxosFromVout = utxosFromVout;
+    }
+
+    public BlockChainService getBlockChainService() {
+        return blockChainService;
+    }
+
+    public void setBlockChainService(BlockChainService blockChainService) {
+        this.blockChainService = blockChainService;
+    }
+
+    public TransactionService getTransactionService() {
+        return transactionService;
+    }
+
+    public void setTransactionService(TransactionService transactionService) {
+        this.transactionService = transactionService;
     }
 }

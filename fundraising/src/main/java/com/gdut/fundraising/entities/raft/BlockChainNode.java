@@ -1,6 +1,8 @@
 package com.gdut.fundraising.entities.raft;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gdut.fundraising.blockchain.Peer;
+import com.gdut.fundraising.blockchain.Transaction;
 import com.gdut.fundraising.constant.raft.MessageType;
 import com.gdut.fundraising.constant.raft.NodeStatus;
 import com.gdut.fundraising.dto.raft.AppendLogRequest;
@@ -12,8 +14,10 @@ import com.gdut.fundraising.manager.impl.RaftLogManagerImpl;
 import com.gdut.fundraising.service.impl.NetworkServiceImpl;
 import com.gdut.fundraising.task.RaftThreadPool;
 import com.gdut.fundraising.util.JsonResult;
+import com.gdut.fundraising.util.NetworkUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +42,9 @@ public class BlockChainNode extends DefaultNode {
 //    @Value("${server.port}")
 //    private String port;
 
+    @Autowired
+    private Peer peer;
+
     /**
      * 初始化函数，在调用构造器时会调用
      */
@@ -51,6 +58,7 @@ public class BlockChainNode extends DefaultNode {
     public void start() {
         super.start();
     }
+
 
     /**
      * 初始化机器节点集
@@ -112,14 +120,16 @@ public class BlockChainNode extends DefaultNode {
         this.raftLogManager = new RaftLogManagerImpl();
     }
 
+
     /**
      * 发送数据给其他节点去保持一致性
+     *
      * @param data
      * @return
      */
-    public boolean sendLogToOtherNodeForConsistency(Test data){
+    public boolean sendLogToOtherNodeForConsistency(Test data) {
         //构建索引
-        LogEntry logEntry=buildLogEntry(currentTerm,data.getData(),raftLogManager.getLastLogIndex()+1);
+        LogEntry logEntry = buildLogEntry(currentTerm, data.getData(), raftLogManager.getLastLogIndex() + 1);
         //下面采用原子量进行复制的统计
         final AtomicInteger success = new AtomicInteger(0);
         //异步
@@ -128,22 +138,22 @@ public class BlockChainNode extends DefaultNode {
         // 预提交到本地日志
         //here write ahead log(my local log)
         //如果后面发生日志复制达不到一半的条件，则执行撤销
-        boolean res= raftLogManager.write(logEntry);
-        if(!res){
+        boolean res = raftLogManager.write(logEntry);
+        if (!res) {
             LOGGER.info("write logModule fail, logEntry info : {}, log index : {}", logEntry, logEntry.getIndex());
             return false;
         }
         LOGGER.info("write logModule success, logEntry info : {}, log index : {}", logEntry, logEntry.getIndex());
 
-        int count=0;
+        int count = 0;
         //给每个节点同步数据
-        for(NodeInfo nodeInfo:nodeInfoSet.getNodeExceptSelf()){
+        for (NodeInfo nodeInfo : nodeInfoSet.getNodeExceptSelf()) {
             //如果节点不存活，直接跳过，省去等待时间
 //            if(!nodeInfo.isAlive()){
 //                continue;
 //            }
             ++count;
-            futureList.add(replication(nodeInfo,logEntry));
+            futureList.add(replication(nodeInfo, logEntry));
         }
 
         CountDownLatch latch = new CountDownLatch(futureList.size());
@@ -215,7 +225,25 @@ public class BlockChainNode extends DefaultNode {
     }
 
     /**
+     * 广播给leader节点，由leader节点去创建区块以及共识
+     *
+     * @param txs
+     * @return
+     */
+    public boolean broadcastTransaction(List<Transaction> txs) {
+        String url = "http://" + nodeInfoSet.getLeader().getId() + "/fundraising/node/broadcast";
+        try {
+            JsonResult res = networkService.post(url, txs);
+            return (boolean) res.getData();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    /**
      * 复制日志到其他机器
+     *
      * @param nodeInfo
      * @param logEntry
      * @return
@@ -225,7 +253,7 @@ public class BlockChainNode extends DefaultNode {
             long start = System.currentTimeMillis(), end = start;
             // 10 秒重试时间
             while (end - start < 10 * 1000L) {
-                AppendLogRequest appendLogRequest=new AppendLogRequest();
+                AppendLogRequest appendLogRequest = new AppendLogRequest();
                 appendLogRequest.setLeaderId(nodeInfoSet.getSelf().getId());
                 appendLogRequest.setTerm(currentTerm);
                 appendLogRequest.setLeaderCommit(commitIndex);
@@ -310,7 +338,7 @@ public class BlockChainNode extends DefaultNode {
 
 
     private LogEntry buildLogEntry(long currentTerm, String data, long index) {
-        LogEntry logEntry=new LogEntry();
+        LogEntry logEntry = new LogEntry();
         logEntry.setData(data);
         logEntry.setTerm(currentTerm);
         logEntry.setIndex(index);
@@ -531,5 +559,14 @@ public class BlockChainNode extends DefaultNode {
             nextIndexs.put(node, raftLogManager.getLastLogIndex() + 1);
             matchIndexs.put(node, 0L);
         }
+
+    }
+
+    public Peer getPeer() {
+        return peer;
+    }
+
+    public void setPeer(Peer peer) {
+        this.peer = peer;
     }
 }

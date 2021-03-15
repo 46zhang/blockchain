@@ -16,14 +16,26 @@ public class NetworkServiceImpl implements NetworkService {
 
     @Override
     public <R extends Request> JsonResult post(String ip, String port, R data) {
-        String result= NetworkUtils.postByHttp(NetworkUtils.buildUrl(ip,port,data),data);
+        String result = NetworkUtils.postByHttp(NetworkUtils.buildUrl(ip, port, data), data);
 
-        JsonResult jsonResult= JSON.parseObject(result, JsonResult.class);
+        JsonResult jsonResult = JSON.parseObject(result, JsonResult.class);
 
-        if(jsonResult.getCode()!=100){
-            throw new BaseException(jsonResult.getCode(),jsonResult.getMsg());
+        if (jsonResult.getCode() != 100) {
+            throw new BaseException(jsonResult.getCode(), jsonResult.getMsg());
         }
-        return  jsonResult;
+        return jsonResult;
+    }
+
+    @Override
+    public <R> JsonResult post(String url, R data) {
+        String result = NetworkUtils.postByHttp(url, data);
+
+        JsonResult jsonResult = JSON.parseObject(result, JsonResult.class);
+
+        if (jsonResult.getCode() != 100) {
+            throw new BaseException(jsonResult.getCode(), jsonResult.getMsg());
+        }
+        return jsonResult;
     }
 
     public static void main(String[] args) {
@@ -34,14 +46,14 @@ public class NetworkServiceImpl implements NetworkService {
         voteRequest.setLastLogTerm(0);
         voteRequest.setTerm(100);
         try {
-            JsonResult result = networkService.post( "localhost", "8092", voteRequest);
+            JsonResult result = networkService.post("localhost", "8092", voteRequest);
             System.out.println(result.getData());
-            ObjectMapper mapper=new ObjectMapper();
+            ObjectMapper mapper = new ObjectMapper();
 
-            VoteResult voteResult=mapper.convertValue(result.getData(), VoteResult.class);
+            VoteResult voteResult = mapper.convertValue(result.getData(), VoteResult.class);
             System.out.println(voteResult.getTerm());
             System.out.println(result);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

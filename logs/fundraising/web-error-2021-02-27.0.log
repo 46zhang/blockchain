@@ -1,0 +1,155 @@
+2021-02-27 00:58:10.634 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8092', ip=localhost, port=8092, alive=false, status=0} will become CANDIDATE and start election leader, current term : [0], LastEntry : [null]
+2021-02-27 00:58:12.749 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8090
+2021-02-27 00:58:12.753 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8091
+2021-02-27 00:58:27.134 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8092', ip=localhost, port=8092, alive=false, status=0} will become CANDIDATE and start election leader, current term : [1], LastEntry : [null]
+2021-02-27 00:58:29.146 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8090
+2021-02-27 00:58:31.411 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 00:58:36.454 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 00:59:27.218 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8090', ip=localhost, port=8090, alive=false, status=0} will become CANDIDATE and start election leader, current term : [2], LastEntry : [null]
+2021-02-27 00:59:28.049 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8091', ip=localhost, port=8091, alive=false, status=0} will become CANDIDATE and start election leader, current term : [2], LastEntry : [null]
+2021-02-27 00:59:29.642 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8092
+2021-02-27 00:59:30.120 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8092
+2021-02-27 00:59:46.219 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8090', ip=localhost, port=8090, alive=false, status=0} will become CANDIDATE and start election leader, current term : [3], LastEntry : [null]
+2021-02-27 00:59:48.227 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8092
+2021-02-27 00:59:50.453 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8092
+2021-02-27 00:59:55.445 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8092
+2021-02-27 01:00:00.460 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8092
+2021-02-27 01:00:05.465 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8092
+2021-02-27 01:00:10.474 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8092
+2021-02-27 01:00:15.487 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8092
+2021-02-27 01:00:20.505 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8092
+2021-02-27 01:00:25.507 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8092
+2021-02-27 01:00:30.533 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8092
+2021-02-27 01:01:31.156 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8092', ip=localhost, port=8092, alive=false, status=0} will become CANDIDATE and start election leader, current term : [4], LastEntry : [null]
+2021-02-27 01:01:33.206 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8090
+2021-02-27 01:01:38.049 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8091', ip=localhost, port=8091, alive=false, status=0} will become CANDIDATE and start election leader, current term : [4], LastEntry : [null]
+2021-02-27 01:01:40.060 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8090
+2021-02-27 01:01:42.434 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:01:47.301 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:01:52.306 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:01:57.314 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:02:02.323 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:02:07.334 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:02:12.344 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:02:17.375 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:02:22.414 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:02:27.431 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:02:32.459 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:02:37.460 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:02:42.474 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:02:47.486 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:02:52.490 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:02:57.494 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:03:02.506 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:03:07.513 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:03:12.520 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:03:17.530 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:03:22.544 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:03:27.552 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 01:03:32.558 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 13:58:11.595 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8092', ip=localhost, port=8092, alive=false, status=0} will become CANDIDATE and start election leader, current term : [0], LastEntry : [null]
+2021-02-27 13:58:14.209 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8090
+2021-02-27 13:58:14.213 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8091
+2021-02-27 13:58:24.671 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8091', ip=localhost, port=8091, alive=false, status=0} will become CANDIDATE and start election leader, current term : [0], LastEntry : [null]
+2021-02-27 13:58:26.902 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8090
+2021-02-27 15:22:23.570 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8091', ip=localhost, port=8091, alive=false, status=0} will become CANDIDATE and start election leader, current term : [0], LastEntry : [null]
+2021-02-27 15:25:37.026 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8092', ip=localhost, port=8092, alive=false, status=0} will become CANDIDATE and start election leader, current term : [0], LastEntry : [null]
+2021-02-27 15:25:39.140 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8091
+2021-02-27 15:25:39.140 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8090
+2021-02-27 15:25:47.657 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8090', ip=localhost, port=8090, alive=false, status=0} will become CANDIDATE and start election leader, current term : [0], LastEntry : [null]
+2021-02-27 15:25:49.812 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8091
+2021-02-27 15:25:52.269 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:26:11.542 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8091', ip=localhost, port=8091, alive=false, status=0} will become CANDIDATE and start election leader, current term : [1], LastEntry : [null]
+2021-02-27 15:26:12.526 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8092', ip=localhost, port=8092, alive=false, status=0} will become CANDIDATE and start election leader, current term : [1], LastEntry : [null]
+2021-02-27 15:26:13.601 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8090
+2021-02-27 15:26:14.533 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8090
+2021-02-27 15:26:28.543 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8091', ip=localhost, port=8091, alive=false, status=0} will become CANDIDATE and start election leader, current term : [2], LastEntry : [null]
+2021-02-27 15:26:30.551 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8090
+2021-02-27 15:26:32.676 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 15:26:37.678 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 15:26:42.685 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 15:26:47.702 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 15:26:52.705 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 15:26:57.714 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 15:27:02.740 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 15:27:07.745 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 15:27:12.755 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 15:27:17.767 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 15:27:22.779 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 15:27:27.786 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 15:27:32.806 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 15:27:58.026 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8092', ip=localhost, port=8092, alive=false, status=0} will become CANDIDATE and start election leader, current term : [3], LastEntry : [null]
+2021-02-27 15:28:00.034 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8091
+2021-02-27 15:28:00.036 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8090
+2021-02-27 15:28:15.559 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8090', ip=localhost, port=8090, alive=false, status=0} will become CANDIDATE and start election leader, current term : [0], LastEntry : [null]
+2021-02-27 15:28:17.683 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8091
+2021-02-27 15:28:21.526 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8092', ip=localhost, port=8092, alive=false, status=0} will become CANDIDATE and start election leader, current term : [4], LastEntry : [null]
+2021-02-27 15:28:23.531 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8091
+2021-02-27 15:28:25.573 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:28:30.577 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:28:35.588 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:28:40.595 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:28:45.605 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:28:50.614 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:28:55.625 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:29:00.633 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:29:05.641 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:29:10.649 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:29:15.656 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:29:20.666 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:29:25.673 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:29:30.684 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:29:35.691 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:29:40.700 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:29:45.708 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:29:50.716 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:29:55.725 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:30:00.737 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:30:05.744 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:30:10.748 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:30:15.762 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:30:20.768 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:30:25.777 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:30:30.791 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:30:35.796 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:30:40.807 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:30:45.820 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8091
+2021-02-27 15:33:26.760 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8091', ip=localhost, port=8091, alive=false, status=0} will become CANDIDATE and start election leader, current term : [5], LastEntry : [null]
+2021-02-27 15:33:28.815 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8092
+2021-02-27 15:33:34.559 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8090', ip=localhost, port=8090, alive=false, status=0} will become CANDIDATE and start election leader, current term : [5], LastEntry : [null]
+2021-02-27 15:33:36.575 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8092
+2021-02-27 15:33:38.724 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8092
+2021-02-27 15:33:40.700 [main] ERROR o.s.b.diagnostics.LoggingFailureAnalysisReporter - 
+
+***************************
+APPLICATION FAILED TO START
+***************************
+
+Description:
+
+Web server failed to start. Port 8091 was already in use.
+
+Action:
+
+Identify and stop the process that's listening on port 8091 or configure this application to listen on another port.
+
+2021-02-27 15:33:43.764 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8092
+2021-02-27 15:33:48.768 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8092
+2021-02-27 15:33:53.787 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8092
+2021-02-27 16:45:50.436 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8092', ip=localhost, port=8092, alive=false, status=0} will become CANDIDATE and start election leader, current term : [6], LastEntry : [null]
+2021-02-27 16:45:52.492 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8090
+2021-02-27 16:46:01.760 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - node NodeInfo{id='localhost:8091', ip=localhost, port=8091, alive=false, status=0} will become CANDIDATE and start election leader, current term : [6], LastEntry : [null]
+2021-02-27 16:46:03.770 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - ElectionTask  Fail, request node : localhost:8090
+2021-02-27 16:46:06.246 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 16:46:11.249 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 16:46:16.261 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 16:46:21.277 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 16:46:26.279 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 16:46:31.288 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 16:46:36.299 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 16:46:41.306 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 16:46:46.318 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 16:46:51.326 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 16:46:56.332 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 16:47:01.345 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
+2021-02-27 16:47:06.367 [Raft thread] ERROR com.gdut.fundraising.entities.raft.BlockChainNode - HeartBeatTask  Fail, request node : localhost:8090
