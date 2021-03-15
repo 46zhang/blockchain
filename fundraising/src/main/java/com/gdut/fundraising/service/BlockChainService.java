@@ -1,5 +1,6 @@
 package com.gdut.fundraising.service;
 
+import com.gdut.fundraising.blockchain.Block;
 import com.gdut.fundraising.blockchain.Transaction;
 import com.gdut.fundraising.entities.SpendEntity;
 
@@ -27,4 +28,11 @@ public interface BlockChainService {
      * @return
      */
     boolean verifyTransactionsFromOtherNode(List<Transaction> txs);
+
+    /**
+     * 添加区块到区块链
+     * @param block
+     * @return
+     */
+    boolean addBlockToChain(Block block);
 }

@@ -74,28 +74,52 @@ public class BlockChainServiceImpl implements BlockChainService {
         //计算该区块应该位于哪个高度
         long height = calculateBlockHeight(blockChain, block);
         //说明应该添加到最后一块
-        if (blockChain.size() == height) {
-            blockChain.add(block);
-            //更新UTXOSet和交易池
-            receiveBlockAtEndOfChain(peer, block.getTxs());
-        } else if (height == blockChain.size() - 1) {
-            //末尾的前一块，则需要把原先的最后一块回滚，再插入
-            Block lastBlock = blockChain.get(blockChain.size() - 1);
-            //hash是16进制字符串
-            //TODO 根据投票判断是否要回滚当前模块
-            // 重点测试为什么哈希值小就要保留该区块，哈希值大小怎么决定，以及保留的原因
+        //加锁互斥，保证线程安全
+        synchronized (blockChain) {
+            if (blockChain.size() == height) {
+                blockChain.add(block);
+                //更新UTXOSet和交易池
+                receiveBlockAtEndOfChain(peer, block.getTxs());
+            } else if (height == blockChain.size() - 1) {
+                //末尾的前一块，则需要把原先的最后一块回滚，再插入
+                Block lastBlock = blockChain.get(blockChain.size() - 1);
+                //hash是16进制字符串
+                //TODO 根据投票判断是否要回滚当前模块
+                // 重点测试为什么哈希值小就要保留该区块，哈希值大小怎么决定，以及保留的原因
 
-            //否则，删除掉最后的区块，将其替换为新的区块
-            blockChain.remove(blockChain.size() - 1);
-            blockChain.add(block);
-            updateBlockAtEndOfChain(peer, block.getTxs());
+                //否则，删除掉最后的区块，将其替换为新的区块
+                blockChain.remove(blockChain.size() - 1);
+                blockChain.add(block);
+                updateBlockAtEndOfChain(peer, block.getTxs());
 
-        } else {
-            //其他位置return false
-            return false;
+            } else {
+                //其他位置return false
+                return false;
+            }
         }
 
         return true;
+    }
+
+    /**
+     * 回滚最后一个区块
+     *
+     * @param peer
+     * @param block
+     */
+    @Override
+    public void rollBackBlock(Peer peer, Block block) {
+        List<Block> blockChain = peer.getBlockChain();
+        //计算该区块应该位于哪个高度
+        long height = calculateBlockHeight(blockChain, block);
+
+        if (height == blockChain.size() - 1) {
+            //删除掉最后的区块.加锁互斥，保证线程安全
+            synchronized (blockChain) {
+                blockChain.remove(blockChain.size() - 1);
+                rollBack(peer);
+            }
+        }
     }
 
     /**

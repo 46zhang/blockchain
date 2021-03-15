@@ -85,7 +85,7 @@ public interface TransactionService {
                                                                       List<Transaction> txs);
 
     /**
-     *
+     * 添加交易
      * @param peer
      * @param t
      */

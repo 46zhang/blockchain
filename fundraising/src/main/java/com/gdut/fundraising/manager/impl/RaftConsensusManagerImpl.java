@@ -1,11 +1,13 @@
 package com.gdut.fundraising.manager.impl;
 
 
+import com.gdut.fundraising.blockchain.Peer;
 import com.gdut.fundraising.constant.raft.NodeStatus;
 import com.gdut.fundraising.dto.raft.AppendLogRequest;
 import com.gdut.fundraising.dto.raft.AppendLogResult;
 import com.gdut.fundraising.dto.raft.VoteRequest;
 import com.gdut.fundraising.dto.raft.VoteResult;
+import com.gdut.fundraising.entities.raft.BlockChainNode;
 import com.gdut.fundraising.entities.raft.DefaultNode;
 import com.gdut.fundraising.entities.raft.LogEntry;
 import com.gdut.fundraising.entities.raft.NodeInfoSet;
@@ -34,7 +36,7 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
      */
 
     @Override
-    public VoteResult dealVoteRequest(VoteRequest param, final DefaultNode node) {
+    public VoteResult dealVoteRequest(VoteRequest param, final BlockChainNode node) {
         try {
             if (!voteLock.tryLock()) {
                 return VoteResult.fail(node.getCurrentTerm());
@@ -44,11 +46,11 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
             if (param.getTerm() < node.getCurrentTerm()) {
                 return VoteResult.fail(node.getCurrentTerm());
             }
-            //TODO 先屏蔽注释，方便查看
-//            LOGGER.info("node {} current vote for [{}], param candidateId : {}", node.getNodeInfoSet().getSelf(),
-//                    node.getVotedFor(), param.getCandidateId());
-//            LOGGER.info("node {} current term {}, peer term : {}", node.getNodeInfoSet().getSelf(),
-//                    node.getCurrentTerm(), param.getTerm());
+
+            LOGGER.info("node {} current vote for [{}], param candidateId : {}", node.getNodeInfoSet().getSelf(),
+                    node.getVotedFor(), param.getCandidateId());
+            LOGGER.info("node {} current term {}, peer term : {}", node.getNodeInfoSet().getSelf(),
+                    node.getCurrentTerm(), param.getTerm());
             // (当前节点并没有投票 或者 已经投票过了且是对方节点) && 对方日志和自己一样新
             if ((StringUtils.isEmpty(node.getVotedFor()) || node.getVotedFor().equals(param.getCandidateId()))) {
 
@@ -77,13 +79,13 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
 
     /**
      * 添加日志
-     *
+     * 更新区块链
      * @param param
      * @param node
      * @return
      */
     @Override
-    public AppendLogResult appendLog(AppendLogRequest param, DefaultNode node) {
+    public AppendLogResult appendLog(AppendLogRequest param, BlockChainNode node) {
         AppendLogResult result = AppendLogResult.fail(node.getCurrentTerm());
         try {
             if (!appendLock.tryLock()) {
@@ -143,7 +145,7 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
             if (existLog != null && existLog.getTerm() != param.getEntries()[0].getTerm()) {
                 // 删除这一条和之后所有的, 然后写入日志和状态机.
                 LOGGER.info("delete log entry because index are different from leader leader: {}, own: {}",
-                       param, existLog);
+                        param, existLog);
                 node.getRaftLogManager().removeOnStartIndex(param.getPrevLogIndex() + 1);
             }
 //            else if (existLog != null) {
@@ -155,17 +157,26 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
 //            }
 
             // 写进日志并且应用到状态机
+            //更新区块链
             for (LogEntry entry : param.getEntries()) {
                 boolean res = node.getRaftLogManager().write(entry);
                 //写入日志失败
                 if (!res) {
-                    LOGGER.error("write data to log fail!! log: {}",entry);
+                    LOGGER.error("write data to log fail!! log: {}", entry);
+                    return result;
+                }
+                //更新当前区块链
+                Peer peer = node.getPeer();
+                res = peer.getBlockChainService().addBlockToChain(peer, entry.getData());
+                if (!res) {
+                    LOGGER.error("add block to chain fail!! log: {}", entry);
                     return result;
                 }
                 //暂时不用状态机
                 //node.stateMachine.apply(entry);
-                result.setSuccess(true);
             }
+
+            result.setSuccess(true);
 
             //如果 leaderCommit > commitIndex，令 commitIndex 等于 leaderCommit 和 新日志条目索引值中较小的一个
             if (param.getLeaderCommit() > node.getCommitIndex()) {

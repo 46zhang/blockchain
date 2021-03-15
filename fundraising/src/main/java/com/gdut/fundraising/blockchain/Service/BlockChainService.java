@@ -30,4 +30,11 @@ public interface BlockChainService {
      * @return
      */
     boolean addBlockToChain(Peer peer,Block block);
+
+    /**
+     * 回滚当前的区块，block区块必须是最后一个区块才可以回滚
+     * @param peer
+     * @param block
+     */
+    void rollBackBlock(Peer peer,Block block);
 }
