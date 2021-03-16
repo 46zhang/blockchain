@@ -17,14 +17,14 @@ import java.util.List;
 public class Peer {
 
     /**
-     * 区块链
+     * 区块链的数据，用volatile关键字声明，确保某个线程修改后，对其他线程可见
      */
-    private List<Block> blockChain;
+    volatile private List<Block> blockChain;
 
     /**
      * utxo 哈希集
      */
-    private HashMap<Pointer, UTXO> UTXOHashMap;
+    volatile private HashMap<Pointer, UTXO> UTXOHashMap;
 
     /**
      * 钱包
@@ -39,7 +39,7 @@ public class Peer {
     /**
      * 交易池
      */
-    private HashMap<String, Transaction> transactionPool;
+    volatile private HashMap<String, Transaction> transactionPool;
 
     /**
      * utxo 哈希集备份
@@ -98,7 +98,6 @@ public class Peer {
         }
         return money;
     }
-
 
 
     public List<Block> getBlockChain() {
