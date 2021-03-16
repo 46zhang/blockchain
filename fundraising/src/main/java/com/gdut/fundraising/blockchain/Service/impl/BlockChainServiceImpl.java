@@ -28,8 +28,8 @@ public class BlockChainServiceImpl implements BlockChainService {
     @Override
     public Block createCandidateBlock(List<Transaction> txs, Block preBlock) {
         Block block = new Block();
-        block.setPreBlockHash(preBlock.getHash());
-        block.setHeight(preBlock.getHeight() + 1);
+        block.setPreBlockHash(preBlock == null ? null : preBlock.getHash());
+        block.setHeight(preBlock == null ? 0 : preBlock.getHeight() + 1);
         block.setTime(new Date());
         block.setTxs(txs);
         block.setVersion(BlockChainConstant.VERSION);
@@ -40,6 +40,7 @@ public class BlockChainServiceImpl implements BlockChainService {
 
     /**
      * 校验区块
+     *
      * @param peer
      * @param block
      * @return
@@ -62,6 +63,7 @@ public class BlockChainServiceImpl implements BlockChainService {
 
     /**
      * 添加区块到区块链
+     *
      * @param peer
      * @param block
      * @return

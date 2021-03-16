@@ -2,6 +2,7 @@ package com.gdut.fundraising.service.impl;
 
 import com.gdut.fundraising.blockchain.Block;
 import com.gdut.fundraising.blockchain.Peer;
+import com.gdut.fundraising.blockchain.Service.TransactionService;
 import com.gdut.fundraising.blockchain.Transaction;
 import com.gdut.fundraising.constant.raft.NodeStatus;
 import com.gdut.fundraising.entities.SpendEntity;
@@ -22,6 +23,7 @@ public class BlockChainServiceImpl implements BlockChainService {
 
     /**
      * 募捐
+     *
      * @param userId
      * @param projectId
      * @param money
@@ -50,11 +52,12 @@ public class BlockChainServiceImpl implements BlockChainService {
 
     /**
      * leader节点做一致性该做的事
+     *
      * @param peer
      * @return
      */
     private boolean doConsensus(Peer peer) {
-        if (blockChainNode.status != NodeStatus.LEADER) {
+         if (blockChainNode.status != NodeStatus.LEADER) {
             throw new BaseException(400, "区块链共识出错，原因为非节点想代替主节点引导共识");
         }
 
@@ -62,9 +65,9 @@ public class BlockChainServiceImpl implements BlockChainService {
         Block block = createBlock(peer);
 
         //添加区块到区块链中,该方法是线程安全的
-        boolean res= peer.getBlockChainService().addBlockToChain(peer, block);
+        boolean res = peer.getBlockChainService().addBlockToChain(peer, block);
 
-        if(!res){
+        if (!res) {
             return false;
         }
 
@@ -79,7 +82,6 @@ public class BlockChainServiceImpl implements BlockChainService {
 
         return res;
     }
-
 
 
     /**
@@ -136,7 +138,7 @@ public class BlockChainServiceImpl implements BlockChainService {
     @Override
     public boolean addBlockToChain(Block block) {
         //添加区块到区块链中,该方法是线程安全的
-        Peer peer=blockChainNode.getPeer();
+        Peer peer = blockChainNode.getPeer();
         return peer.getBlockChainService().addBlockToChain(peer, block);
     }
 

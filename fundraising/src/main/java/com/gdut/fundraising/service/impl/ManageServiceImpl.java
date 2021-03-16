@@ -147,7 +147,7 @@ public class ManageServiceImpl implements ManageService {
             spendEntity.setOrderOperator(userTblEntity.getUserId());
 
             if(spendEntity.getMoney() <= 0){
-                throw new BaseException(400, "支出的金钱不可小于等于零！");
+                throw new BaseException(400, "支出的金钱不可小于等于零!");
             }
 
             boolean res= blockChainService.useMoney(spendEntity);
@@ -157,7 +157,7 @@ public class ManageServiceImpl implements ManageService {
             return spendEntity;
         }
         else{
-            throw new BaseException(400, "token认证失败！");
+            throw new BaseException(400, "token认证失败!");
         }
     }
 

@@ -229,7 +229,7 @@ public class TransactionServiceImpl implements TransactionService {
                                                  String userId, String projectId, long money) {
         Transaction transaction = new Transaction();
         Vin vin = new Vin();
-        List<Vin> vinList = new ArrayList<>();
+         List<Vin> vinList = new ArrayList<>();
         Vout vout = new Vout();
         List<Vout> voutList = new ArrayList<>();
         //设置地址

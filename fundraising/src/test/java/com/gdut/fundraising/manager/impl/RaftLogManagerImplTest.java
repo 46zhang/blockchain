@@ -1,5 +1,6 @@
 package com.gdut.fundraising.manager.impl;
 
+import com.gdut.fundraising.blockchain.Block;
 import com.gdut.fundraising.entities.raft.LogEntry;
 import com.gdut.fundraising.manager.RaftLogManager;
 import org.testng.Assert;
@@ -15,7 +16,10 @@ public class RaftLogManagerImplTest {
         LogEntry logEntry = new LogEntry();
         logEntry.setIndex(1);
         logEntry.setTerm(1);
-        logEntry.setData("afsdfsdfs");
+        Block block=new Block();
+        block.setVersion("1");
+
+        logEntry.setData(block);
         boolean res = raftLogManager.write(logEntry);
         raftLogManager.removeOnStartIndex(1);
         Assert.assertTrue(res);
@@ -26,7 +30,7 @@ public class RaftLogManagerImplTest {
 
         Assert.assertTrue(res);
         LogEntry logEntry2 = new LogEntry();
-        logEntry2.setData("sfsdgftgw4t43");
+        logEntry2.setData(block);
         logEntry2.setTerm(1);
         logEntry2.setIndex(raftLogManager.getLastLogIndex() + 1);
         res = raftLogManager.write(logEntry2);
