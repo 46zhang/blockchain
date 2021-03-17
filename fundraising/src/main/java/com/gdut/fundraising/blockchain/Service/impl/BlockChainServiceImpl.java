@@ -5,12 +5,17 @@ import com.gdut.fundraising.blockchain.Service.BlockChainService;
 import com.gdut.fundraising.blockchain.Service.MerkleTreeService;
 import com.gdut.fundraising.blockchain.Service.TransactionService;
 import com.gdut.fundraising.blockchain.Service.UTXOService;
+import com.gdut.fundraising.exception.BaseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
 
 @Service
 public class BlockChainServiceImpl implements BlockChainService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlockChainServiceImpl.class);
 
     MerkleTreeService merkleTreeService;
 
@@ -97,7 +102,6 @@ public class BlockChainServiceImpl implements BlockChainService {
             return false;
         }
 
-
         return true;
     }
 
@@ -112,13 +116,15 @@ public class BlockChainServiceImpl implements BlockChainService {
         List<Block> blockChain = peer.getBlockChain();
         //计算该区块应该位于哪个高度
         long height = calculateBlockHeight(blockChain, block);
-
+        //移除最后一块
         if (height == blockChain.size() - 1) {
             //删除掉最后的区块.加锁互斥，保证线程安全
-
             blockChain.remove(blockChain.size() - 1);
             rollBack(peer);
 
+        } else {
+            LOGGER.error("Block:{},height:{}", block, height);
+            throw new BaseException(400, "不是最后一个区块，无法回滚!!!");
         }
     }
 
@@ -187,6 +193,9 @@ public class BlockChainServiceImpl implements BlockChainService {
      */
     private long calculateBlockHeight(List<Block> blockChain, Block block) {
         if (blockChain.size() == 0) {
+            return 0;
+        } else if (blockChain.size() == 1 &&  blockChain.get(0).getHash().equals(block.getHash())) {
+            //第一个区块
             return 0;
         }
         String preHash = block.getPreBlockHash();

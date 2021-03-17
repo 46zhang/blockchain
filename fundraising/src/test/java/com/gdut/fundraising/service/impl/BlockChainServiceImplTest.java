@@ -1,12 +1,10 @@
 package com.gdut.fundraising.service.impl;
 
-import com.gdut.fundraising.blockchain.Peer;
+import com.gdut.fundraising.blockchain.*;
 import com.gdut.fundraising.blockchain.Service.BlockChainService;
 import com.gdut.fundraising.blockchain.Service.impl.MerkleTreeServiceImpl;
 import com.gdut.fundraising.blockchain.Service.impl.TransactionServiceImpl;
 import com.gdut.fundraising.blockchain.Service.impl.UTXOServiceImpl;
-import com.gdut.fundraising.blockchain.Transaction;
-import com.gdut.fundraising.blockchain.Wallet;
 import com.gdut.fundraising.constant.raft.NodeStatus;
 import com.gdut.fundraising.entities.SpendEntity;
 import com.gdut.fundraising.entities.raft.BlockChainNode;
@@ -17,6 +15,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,7 +48,7 @@ public class BlockChainServiceImplTest {
         transaction.setCoinBase(true);
 
         //peer节点没办法mock，于是创建一个新的peer节点，并手动设置相关的bean
-        Peer peer =initPeer();
+        Peer peer = initPeer();
 
         List<Transaction> transactionList = new ArrayList<>();
         transactionList.add(transaction);
@@ -75,7 +74,7 @@ public class BlockChainServiceImplTest {
         transaction.setCoinBase(true);
 
         //peer节点没办法mock，于是创建一个新的peer节点，并手动设置相关的bean
-        Peer peer =initPeer();
+        Peer peer = initPeer();
 
         List<Transaction> transactionList = new ArrayList<>();
         transactionList.add(transaction);
@@ -102,7 +101,7 @@ public class BlockChainServiceImplTest {
         transaction.setCoinBase(true);
 
         //peer节点没办法mock，于是创建一个新的peer节点，并手动设置相关的bean
-        Peer peer =initPeer();
+        Peer peer = initPeer();
 
         List<Transaction> transactionList = new ArrayList<>();
         transactionList.add(transaction);
@@ -123,19 +122,22 @@ public class BlockChainServiceImplTest {
         String projectId = "sfdfsdg";
         long money = 100L;
 
-        SpendEntity spendEntity=new SpendEntity();
+        SpendEntity spendEntity = new SpendEntity();
         spendEntity.setToAddress("xxx");
         spendEntity.setProjectId(projectId);
         spendEntity.setMoney(money);
 
-        Peer peer=initPeer();
+        Peer peer = initPeer();
+        UTXO utxo = getUTXO(peer.getWallet().getKeyPair().getPublic(), peer.getWallet().getAddress(), userId, projectId);
+        peer.getUTXOHashMap().put(utxo.getPointer(), utxo);
 
         when(blockChainNode.getPeer()).thenReturn(peer);
         when(blockChainNode.sendLogToOtherNodeForConsistency(any())).thenReturn(true);
 
         blockChainNode.status = NodeStatus.LEADER;
 
-        boolean res=blockChainService.useMoney(spendEntity);
+        boolean res = blockChainService.useMoney(spendEntity);
+        Assert.assertTrue(res);
     }
 
     @Test
@@ -146,17 +148,18 @@ public class BlockChainServiceImplTest {
     public void testAddBlockToChain() {
     }
 
-    private Peer initPeer(){
+    private Peer initPeer() {
         //peer节点没办法mock，于是创建一个新的peer节点，并手动设置相关的bean
         Peer peer = new Peer();
         Wallet wallet = new Wallet();
-        wallet.setAddress("xxxxx");
+        wallet.generateKeyAndAddress();
+
         peer.setWallet(wallet);
 
-        TransactionServiceImpl transactionService=new TransactionServiceImpl();
+        TransactionServiceImpl transactionService = new TransactionServiceImpl();
         com.gdut.fundraising.blockchain.Service.impl.BlockChainServiceImpl blockChainService1 =
                 new com.gdut.fundraising.blockchain.Service.impl.BlockChainServiceImpl();
-        UTXOServiceImpl utxoService=new UTXOServiceImpl();
+        UTXOServiceImpl utxoService = new UTXOServiceImpl();
 
         transactionService.setUtxoService(utxoService);
 
@@ -167,5 +170,26 @@ public class BlockChainServiceImplTest {
         peer.setTransactionService(transactionService);
         peer.setBlockChainService(blockChainService1);
         return peer;
+    }
+
+    private UTXO getUTXO(PublicKey pk, String address, String userId, String projectId) {
+        Pointer pointer = new Pointer();
+        UTXO utxo = new UTXO();
+        Vout vout = new Vout();
+
+        pointer.setN(1);
+        pointer.setTxId("afafaaxascasdafdafsdf");
+
+        vout.setMoney(10000L);
+        vout.setToAddress(address);
+
+        utxo.setFromUserId(userId);
+        utxo.setFormProjectId(projectId);
+        utxo.setPointer(pointer);
+        utxo.setConfirmed(true);
+        utxo.setSpent(false);
+        utxo.setVout(vout);
+
+        return utxo;
     }
 }

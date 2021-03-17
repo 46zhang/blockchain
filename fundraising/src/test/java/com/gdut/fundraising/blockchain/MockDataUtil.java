@@ -1,30 +1,30 @@
-//package com.gdut.fundraising.blockchain;
-//
-//import com.gdut.fundraising.blockchain.Block;
-//import com.gdut.fundraising.blockchain.BlockChainConstant;
-//import com.gdut.fundraising.blockchain.Peer;
-//import com.gdut.fundraising.blockchain.Pointer;
-//import com.gdut.fundraising.blockchain.Service.impl.BlockChainServiceImpl;
-//import com.gdut.fundraising.blockchain.Service.impl.MerkleTreeServiceImpl;
-//import com.gdut.fundraising.blockchain.Service.impl.TransactionServiceImpl;
-//import com.gdut.fundraising.blockchain.Service.impl.UTXOServiceImpl;
-//import com.gdut.fundraising.blockchain.Sha256Util;
-//import com.gdut.fundraising.blockchain.Transaction;
-//import com.gdut.fundraising.blockchain.UTXO;
-//import com.gdut.fundraising.blockchain.Vin;
-//import com.gdut.fundraising.blockchain.Vout;
-//import com.gdut.fundraising.blockchain.Wallet;
-//import org.junit.Assert;
-//import org.junit.jupiter.api.Test;
-//
-//import java.security.PublicKey;
-//import java.util.*;
-//
-//public class MockDataUtil {
-//
-//    TransactionServiceImpl transactionService=new TransactionServiceImpl();
-//    BlockChainServiceImpl blockChainService=new BlockChainServiceImpl();
-//
+package com.gdut.fundraising.blockchain;
+
+import com.gdut.fundraising.blockchain.Block;
+import com.gdut.fundraising.blockchain.BlockChainConstant;
+import com.gdut.fundraising.blockchain.Peer;
+import com.gdut.fundraising.blockchain.Pointer;
+import com.gdut.fundraising.blockchain.Service.impl.BlockChainServiceImpl;
+import com.gdut.fundraising.blockchain.Service.impl.MerkleTreeServiceImpl;
+import com.gdut.fundraising.blockchain.Service.impl.TransactionServiceImpl;
+import com.gdut.fundraising.blockchain.Service.impl.UTXOServiceImpl;
+import com.gdut.fundraising.blockchain.Sha256Util;
+import com.gdut.fundraising.blockchain.Transaction;
+import com.gdut.fundraising.blockchain.UTXO;
+import com.gdut.fundraising.blockchain.Vin;
+import com.gdut.fundraising.blockchain.Vout;
+import com.gdut.fundraising.blockchain.Wallet;
+import org.junit.Assert;
+import org.junit.jupiter.api.Test;
+
+import java.security.PublicKey;
+import java.util.*;
+
+public class MockDataUtil {
+
+    TransactionServiceImpl transactionService=new TransactionServiceImpl();
+    BlockChainServiceImpl blockChainService=new BlockChainServiceImpl();
+
 //    @Test
 //    void buildBlockChain() {
 //        //获取节点并初始化钱包
@@ -75,81 +75,81 @@
 //        Assert.assertTrue(peer.getBlockChain().get(1).getTxs().size()==2);
 //        Assert.assertTrue(peer.getUTXOHashMapBackup().containsKey(new Pointer(tx.getId(),0)));
 //    }
-//
-//    public static Block buildBlock(int height, String preHash, List<Transaction> txs) {
-//        Block block = new Block();
-//        MerkleTreeServiceImpl merkleTreeService=new MerkleTreeServiceImpl();
-//        block.setTxs(txs);
-//
-//        block.setMerkleRootHash(merkleTreeService.getMerkleRoot(txs));
-//        block.setHeight(height);
-//        block.setPreBlockHash(preHash);
-//        block.setVersion(BlockChainConstant.VERSION);
-//        block.setTime(new Date());
-//        block.setHash(Sha256Util.doubleSHA256(block.getHeader()));
-//        return block;
-//    }
-//
-//
-//    public static Transaction buildTransaction(boolean coinBase, long fee, Date lockTime,
-//                                                                   List<Vin> vins, List<Vout> vouts) {
-//        Transaction transaction = new Transaction();
-//
-//
-//        transaction.setLockTime(lockTime);
-//        transaction.setFee(fee);
-//        transaction.setCoinBase(coinBase);
-//        transaction.setId(Sha256Util.doubleSHA256(transaction.toString()));
-//
-//        transaction.setInList(vins);
-//        transaction.setOutList(vouts);
-//        return transaction;
-//    }
-//
-//
-//    public static Peer getPeer() {
-//        Peer peer = new Peer();
-//        Wallet wallet = new Wallet();
-//        wallet.generateKeyAndAddress();
-//        peer.setWallet(wallet);
-//        return peer;
-//    }
-//
-//    public static UTXO getUTXO(PublicKey pk, String address) {
-//        Pointer pointer = new Pointer();
-//        UTXO utxo = new UTXO();
-//        Vout vout = new Vout();
-//
-//        pointer.setN(1);
-//        pointer.setTxId(generateRandomStr(32));
-//
-//        vout.setMoney(10000L);
-//        vout.setToAddress(address);
-//
-//        utxo.setPointer(pointer);
-//        utxo.setConfirmed(true);
-//        utxo.setSpent(false);
-//        utxo.setVout(vout);
-//
-//        return utxo;
-//    }
-//
-//    /**
-//     * 随机产生一个length长度的a-Z和0-9混合字符串
-//     *
-//     * @param length 长度
-//     * @return 随机字符串
-//     */
-//    public static String generateRandomStr(int length) {
-//        String base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-//        Random random = new Random();
-//        StringBuilder sb = new StringBuilder();
-//        for (int i = 0; i < length; i++) {
-//            int number = random.nextInt(base.length());
-//            sb.append(base.charAt(number));
-//        }
-//        return sb.toString();
-//    }
-//
-//
-//}
+
+    public static Block buildBlock(int height, String preHash, List<Transaction> txs) {
+        Block block = new Block();
+        MerkleTreeServiceImpl merkleTreeService=new MerkleTreeServiceImpl();
+        block.setTxs(txs);
+
+        block.setMerkleRootHash(merkleTreeService.getMerkleRoot(txs));
+        block.setHeight(height);
+        block.setPreBlockHash(preHash);
+        block.setVersion(BlockChainConstant.VERSION);
+        block.setTime(new Date());
+        block.setHash(Sha256Util.doubleSHA256(block.getHeader()));
+        return block;
+    }
+
+
+    public static Transaction buildTransaction(boolean coinBase, long fee, Date lockTime,
+                                                                   List<Vin> vins, List<Vout> vouts) {
+        Transaction transaction = new Transaction();
+
+
+        transaction.setLockTime(lockTime);
+        transaction.setFee(fee);
+        transaction.setCoinBase(coinBase);
+        transaction.setId(Sha256Util.doubleSHA256(transaction.toString()));
+
+        transaction.setInList(vins);
+        transaction.setOutList(vouts);
+        return transaction;
+    }
+
+
+    public static Peer getPeer() {
+        Peer peer = new Peer();
+        Wallet wallet = new Wallet();
+        wallet.generateKeyAndAddress();
+        peer.setWallet(wallet);
+        return peer;
+    }
+
+    public static UTXO getUTXO(PublicKey pk, String address) {
+        Pointer pointer = new Pointer();
+        UTXO utxo = new UTXO();
+        Vout vout = new Vout();
+
+        pointer.setN(1);
+        pointer.setTxId(generateRandomStr(32));
+
+        vout.setMoney(10000L);
+        vout.setToAddress(address);
+
+        utxo.setPointer(pointer);
+        utxo.setConfirmed(true);
+        utxo.setSpent(false);
+        utxo.setVout(vout);
+
+        return utxo;
+    }
+
+    /**
+     * 随机产生一个length长度的a-Z和0-9混合字符串
+     *
+     * @param length 长度
+     * @return 随机字符串
+     */
+    public static String generateRandomStr(int length) {
+        String base = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        Random random = new Random();
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            int number = random.nextInt(base.length());
+            sb.append(base.charAt(number));
+        }
+        return sb.toString();
+    }
+
+
+}

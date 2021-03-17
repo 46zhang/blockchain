@@ -105,7 +105,7 @@ public class BlockChainServiceImpl implements BlockChainService {
         Peer peer = blockChainNode.getPeer();
         //创币交易
         Transaction transaction = peer.getTransactionService().createTransaction(peer, spendEntity.getToAddress(),
-                spendEntity.getMoney(), spendEntity.getFormUserId(), spendEntity.getProjectId());
+                spendEntity.getMoney(), spendEntity.getProjectId(), spendEntity.getFormUserId());
 
         if (transaction == null) {
             LOGGER.error("transaction create fail!!  spendEntity:{}", spendEntity);

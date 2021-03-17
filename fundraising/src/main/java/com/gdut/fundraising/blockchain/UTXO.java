@@ -46,6 +46,19 @@ public class UTXO {
         return pointer.getTxId() + pointer.getN();
     }
 
+    @Override
+    public String toString() {
+        return "UTXO{" +
+                "pointer='" + pointer + '\'' +
+                ",vout=" + vout + '\'' +
+                ",isSpent='" + isSpent + '\'' +
+                ",isConfirmed='" + isConfirmed + '\'' +
+                ",formProjectId='" + formProjectId + '\'' +
+                ",fromUserId='" + fromUserId + '\'' +
+                ",isCoinBase='" + isCoinBase +
+                '}';
+    }
+
     public Pointer getPointer() {
         return pointer;
     }

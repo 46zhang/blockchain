@@ -14,6 +14,14 @@ public class Pointer {
     private int n;
 
     @Override
+    public String toString() {
+        return "Pointer{" +
+                ",txId='" + txId + '\'' +
+                ",n=" + n + '\'' +
+                '}';
+    }
+
+    @Override
     public int hashCode() {
         final int prime = 31;
         int result = prime * (txId == null ? 1 : txId.hashCode());

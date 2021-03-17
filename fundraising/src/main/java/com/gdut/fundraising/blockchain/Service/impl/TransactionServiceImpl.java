@@ -37,10 +37,13 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Transaction createTransaction(Peer peer, String toAddress, long money,
                                          String projectId, String userId) {
-        long balance = peer.getBalance(peer.getWallet().getAddress());
+        long balance = peer.getBalance(peer.getWallet().getAddress(),projectId);
         //余额不足
         if (balance < money) {
-            return null;
+            LOGGER.error("utxo: {},money:{},toAddress:{},projectId:{},userId:{}",
+                    peer.getUTXOHashMap().values(), money, toAddress, projectId, userId);
+            throw new BaseException(400, "用户余额不够!!!");
+
         }
         List<UTXO> ownUTXOList = new ArrayList<>();
         long amount = 0;
@@ -97,7 +100,7 @@ public class TransactionServiceImpl implements TransactionService {
             } catch (Exception e) {
                 LOGGER.error("sign data error!!! toAddress:{},money:{},userId:{},projectId:{}",
                         toAddress, money, userId, projectId);
-                throw new BaseException(400,"区块链服务出现异常!!");
+                throw new BaseException(400, "区块链服务出现异常!!");
             }
 
         }
@@ -243,9 +246,9 @@ public class TransactionServiceImpl implements TransactionService {
         List<Vout> voutList = new ArrayList<>();
 
         //设置地址
-        Vout vout=buildVout(peer.getWallet().getAddress(),money,userId,projectId);
+        Vout vout = buildVout(peer.getWallet().getAddress(), money, userId, projectId);
 
-        Vin vin=buildVin(generateRandomStr(32).getBytes(),null,null,userId,projectId);
+        Vin vin = buildVin(generateRandomStr(32).getBytes(), null, null, userId, projectId);
 
         voutList.add(vout);
         vinList.add(vin);
