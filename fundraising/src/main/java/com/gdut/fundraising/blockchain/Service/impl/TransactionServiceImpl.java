@@ -3,7 +3,6 @@ package com.gdut.fundraising.blockchain.Service.impl;
 import com.gdut.fundraising.blockchain.*;
 import com.gdut.fundraising.blockchain.Service.TransactionService;
 import com.gdut.fundraising.blockchain.Service.UTXOService;
-import com.gdut.fundraising.constant.UTXOExtendInfoKey;
 import com.gdut.fundraising.exception.BaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
