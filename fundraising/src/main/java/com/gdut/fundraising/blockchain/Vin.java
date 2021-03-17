@@ -21,6 +21,17 @@ public class Vin {
      */
     private Pointer toSpent;
 
+    /**
+     * 项目id
+     */
+    private String formProjectId;
+
+    /**
+     * 用户id
+     */
+    private String fromUserId;
+
+
     public byte[] getSignature() {
         return signature;
     }
@@ -43,5 +54,21 @@ public class Vin {
 
     public void setToSpent(Pointer toSpent) {
         this.toSpent = toSpent;
+    }
+
+    public String getFormProjectId() {
+        return formProjectId;
+    }
+
+    public void setFormProjectId(String formProjectId) {
+        this.formProjectId = formProjectId;
+    }
+
+    public String getFromUserId() {
+        return fromUserId;
+    }
+
+    public void setFromUserId(String fromUserId) {
+        this.fromUserId = fromUserId;
     }
 }

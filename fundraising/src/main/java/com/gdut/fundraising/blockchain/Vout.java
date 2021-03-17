@@ -14,6 +14,16 @@ public class Vout {
      */
     private long money;
 
+    /**
+     * 项目id
+     */
+    private String formProjectId;
+
+    /**
+     * 用户id
+     */
+    private String fromUserId;
+
     @Override
     public String toString() {
         return toAddress+money;
@@ -33,5 +43,21 @@ public class Vout {
 
     public void setMoney(long money) {
         this.money = money;
+    }
+
+    public String getFormProjectId() {
+        return formProjectId;
+    }
+
+    public void setFormProjectId(String formProjectId) {
+        this.formProjectId = formProjectId;
+    }
+
+    public String getFromUserId() {
+        return fromUserId;
+    }
+
+    public void setFromUserId(String fromUserId) {
+        this.fromUserId = fromUserId;
     }
 }

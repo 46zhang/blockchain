@@ -8,7 +8,12 @@ import com.gdut.fundraising.constant.raft.NodeStatus;
 import com.gdut.fundraising.entities.SpendEntity;
 import com.gdut.fundraising.entities.raft.BlockChainNode;
 import com.gdut.fundraising.exception.BaseException;
+import com.gdut.fundraising.manager.impl.RaftLogManagerImpl;
 import com.gdut.fundraising.service.BlockChainService;
+import org.apache.juli.logging.Log;
+import org.apache.juli.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +23,8 @@ import java.util.List;
 
 @Service
 public class BlockChainServiceImpl implements BlockChainService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlockChainServiceImpl.class);
+
     @Autowired
     private BlockChainNode blockChainNode;
 
@@ -35,9 +42,12 @@ public class BlockChainServiceImpl implements BlockChainService {
         //创币交易
         Transaction transaction = peer.getTransactionService().createCoinBaseTransaction(peer, peer.getWallet().getAddress(),
                 userId, projectId, money);
+
         if (transaction == null) {
+            LOGGER.error("transaction create fail!!  userId:{},projectId:{},money:{}", userId, projectId, money);
             return false;
         }
+
         //如果当前节点是leader则直接创建新的区块，如果是其他节点则只需要广播交易过去，由leader节点去创建区块
         Collection<Transaction> collection = peer.getTransactionPool().values();
         List<Transaction> txs = new ArrayList<Transaction>(collection);
@@ -57,7 +67,7 @@ public class BlockChainServiceImpl implements BlockChainService {
      * @return
      */
     private boolean doConsensus(Peer peer) {
-         if (blockChainNode.status != NodeStatus.LEADER) {
+        if (blockChainNode.status != NodeStatus.LEADER) {
             throw new BaseException(400, "区块链共识出错，原因为非节点想代替主节点引导共识");
         }
 
@@ -94,8 +104,11 @@ public class BlockChainServiceImpl implements BlockChainService {
     public boolean useMoney(SpendEntity spendEntity) {
         Peer peer = blockChainNode.getPeer();
         //创币交易
-        Transaction transaction = peer.getTransactionService().createTransaction(peer, spendEntity.getToAddress(), spendEntity.getMoney());
+        Transaction transaction = peer.getTransactionService().createTransaction(peer, spendEntity.getToAddress(),
+                spendEntity.getMoney(), spendEntity.getFormUserId(), spendEntity.getProjectId());
+
         if (transaction == null) {
+            LOGGER.error("transaction create fail!!  spendEntity:{}", spendEntity);
             return false;
         }
 

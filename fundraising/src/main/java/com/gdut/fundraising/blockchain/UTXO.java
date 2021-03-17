@@ -1,5 +1,7 @@
 package com.gdut.fundraising.blockchain;
 
+import java.util.Map;
+
 /**
  * 未消费交易输出模块
  */
@@ -29,9 +31,19 @@ public class UTXO {
      */
     private boolean isCoinBase;
 
+    /**
+     * 项目id
+     */
+    private String formProjectId;
 
-    public String encodeString(){
-        return pointer.getTxId()+pointer.getN();
+    /**
+     * 用户id
+     */
+    private String fromUserId;
+
+
+    public String encodeString() {
+        return pointer.getTxId() + pointer.getN();
     }
 
     public Pointer getPointer() {
@@ -73,5 +85,21 @@ public class UTXO {
 
     public void setCoinBase(boolean coinBase) {
         isCoinBase = coinBase;
+    }
+
+    public String getFormProjectId() {
+        return formProjectId;
+    }
+
+    public void setFormProjectId(String formProjectId) {
+        this.formProjectId = formProjectId;
+    }
+
+    public String getFromUserId() {
+        return fromUserId;
+    }
+
+    public void setFromUserId(String fromUserId) {
+        this.fromUserId = fromUserId;
     }
 }

@@ -3,6 +3,10 @@ package com.gdut.fundraising.blockchain.Service.impl;
 import com.gdut.fundraising.blockchain.*;
 import com.gdut.fundraising.blockchain.Service.TransactionService;
 import com.gdut.fundraising.blockchain.Service.UTXOService;
+import com.gdut.fundraising.constant.UTXOExtendInfoKey;
+import com.gdut.fundraising.exception.BaseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -15,6 +19,7 @@ import java.util.Random;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionServiceImpl.class);
 
     private static String ALGORITHM_NAME = "SHA256withECDSA";
 
@@ -26,10 +31,13 @@ public class TransactionServiceImpl implements TransactionService {
      * @param peer
      * @param toAddress
      * @param money
+     * @param projectId
+     * @param userId
      * @return
      */
     @Override
-    public Transaction createTransaction(Peer peer, String toAddress, long money) {
+    public Transaction createTransaction(Peer peer, String toAddress, long money,
+                                         String projectId, String userId) {
         long balance = peer.getBalance(peer.getWallet().getAddress());
         //余额不足
         if (balance < money) {
@@ -43,6 +51,12 @@ public class TransactionServiceImpl implements TransactionService {
             if (utxo.isSpent() || !utxo.getVout().getToAddress().equals(peer.getWallet().getAddress())) {
                 continue;
             }
+
+            //不是同一个项目的utxo不能使用，不累加金钱
+            if (!utxo.getFormProjectId().equals(projectId)) {
+                continue;
+            }
+
             amount += utxo.getVout().getMoney();
             ownUTXOList.add(utxo);
             if (amount >= money) {
@@ -52,18 +66,14 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction transaction = new Transaction();
         Wallet ownWallet = peer.getWallet();
-        Vout other = new Vout();
         //要减去手续费
-        other.setMoney(money - BlockChainConstant.FEE);
-        other.setToAddress(toAddress);
+        Vout other = buildVout(toAddress, money - BlockChainConstant.FEE, userId, projectId);
+
         transaction.getOutList().add(other);
 
         //如果剩余金额大于所需支付金额，那么会将多一笔vout，把多的钱给自己，找零
         if (amount > money) {
-            Vout ownOut = new Vout();
-            ownOut.setMoney(amount - money);
-            //设置最新的地址
-            ownOut.setToAddress(ownWallet.getAddress());
+            Vout ownOut = buildVout(ownWallet.getAddress(), amount - money, userId, projectId);
             transaction.getOutList().add(ownOut);
         }
 
@@ -75,11 +85,6 @@ public class TransactionServiceImpl implements TransactionService {
             PublicKey publicKey = ownWallet.getKeyPair().getPublic();
             PrivateKey privateKey = ownWallet.getKeyPair().getPrivate();
 
-            Vin vin = new Vin();
-            //设置公钥
-            vin.setPublicKey(publicKey);
-            //设置定位指针
-            vin.setToSpent(utxo.getPointer());
             //设置待加密文本
             String s = utxo.getPointer().getTxId() + utxo.getPointer().getN() + transaction.getOutList();
             //得到加密内容
@@ -87,12 +92,15 @@ public class TransactionServiceImpl implements TransactionService {
             try {
                 //产生数字签名
                 byte[] signature = EccUtil.signData(ALGORITHM_NAME, data, privateKey);
-                vin.setSignature(signature);
+                Vin vin = buildVin(signature, publicKey, utxo.getPointer(), userId, projectId);
+                //加入到交易的输入单元
+                transaction.getInList().add(vin);
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error("sign data error!!! toAddress:{},money:{},userId:{},projectId:{}",
+                        toAddress, money, userId, projectId);
+                throw new BaseException(400,"区块链服务出现异常!!");
             }
-            //加入到交易的输入单元
-            transaction.getInList().add(vin);
+
         }
 
         //区块都要标记为已被消费
@@ -102,8 +110,12 @@ public class TransactionServiceImpl implements TransactionService {
         //创建交易id,由交易内容的toString获取得到
         transaction.setId(Sha256Util.doubleSHA256(transaction.toString()));
 
+        //设置项目信息
+        transaction.setFromUserId(userId);
+        transaction.setFormProjectId(projectId);
+
         //插入到交易池
-        addTransaction(peer,transaction);
+        addTransaction(peer, transaction);
         //peer.getTransactionPool().put(transaction.getId(), transaction);
         return transaction;
     }
@@ -228,19 +240,17 @@ public class TransactionServiceImpl implements TransactionService {
     public Transaction createCoinBaseTransaction(Peer peer, String toAddress,
                                                  String userId, String projectId, long money) {
         Transaction transaction = new Transaction();
-        Vin vin = new Vin();
-         List<Vin> vinList = new ArrayList<>();
-        Vout vout = new Vout();
+        List<Vin> vinList = new ArrayList<>();
         List<Vout> voutList = new ArrayList<>();
+
         //设置地址
-        vout.setToAddress(peer.getWallet().getAddress());
-        vout.setMoney(money);
+        Vout vout=buildVout(peer.getWallet().getAddress(),money,userId,projectId);
+
+        Vin vin=buildVin(generateRandomStr(32).getBytes(),null,null,userId,projectId);
+
         voutList.add(vout);
         vinList.add(vin);
-        //创币交易没有输入单元，但为了保持一致，随便填充一个输入单元，签名默认使用32位随机字符串
-        vin.setSignature(generateRandomStr(32).getBytes());
-        //没有公钥
-        vin.setPublicKey(null);
+
         transaction.setInList(vinList);
         transaction.setOutList(voutList);
         //创币交易
@@ -251,7 +261,7 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setFormProjectId(projectId);
 
         //加入交易池
-        addTransaction(peer,transaction);
+        addTransaction(peer, transaction);
         return transaction;
     }
 
@@ -339,6 +349,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     /**
      * 插入交易到交易池
+     *
      * @param peer
      * @param t
      */
@@ -347,10 +358,17 @@ public class TransactionServiceImpl implements TransactionService {
         peer.getTransactionPool().put(t.getId(), t);
     }
 
+    /**
+     * 将区块中的交易中所有的vout封装成utxo
+     *
+     * @param txs
+     * @return
+     */
     private List<UTXO> findUTXOFromTxsInBlock(List<Transaction> txs) {
         List<UTXO> utxoList = new ArrayList<>();
         for (Transaction t : txs) {
             for (int i = 0; i < t.getOutList().size(); ++i) {
+                //生成utxo
                 UTXO utxo = new UTXO();
                 utxo.setSpent(false);
                 utxo.setVout(t.getOutList().get(i));
@@ -358,6 +376,11 @@ public class TransactionServiceImpl implements TransactionService {
                 utxo.setCoinBase(t.isCoinBase());
                 //设置指针
                 utxo.setPointer(new Pointer(t.getId(), i));
+
+                //设置项目信息
+                utxo.setFormProjectId(t.getOutList().get(i).getFormProjectId());
+                utxo.setFromUserId(t.getOutList().get(i).getFromUserId());
+
                 utxoList.add(utxo);
             }
         }
@@ -397,6 +420,45 @@ public class TransactionServiceImpl implements TransactionService {
             sb.append(base.charAt(number));
         }
         return sb.toString();
+    }
+
+    /**
+     * 构建vout
+     *
+     * @param toAddress
+     * @param money
+     * @param userId
+     * @param projectId
+     * @return
+     */
+    private Vout buildVout(String toAddress, long money, String userId, String projectId) {
+        Vout vout = new Vout();
+        vout.setFormProjectId(projectId);
+        vout.setFromUserId(userId);
+        vout.setMoney(money);
+        vout.setToAddress(toAddress);
+        return vout;
+    }
+
+
+    /**
+     * 构建vin
+     *
+     * @param signature
+     * @param publicKey
+     * @param pointer
+     * @param userId
+     * @param projectId
+     * @return
+     */
+    private Vin buildVin(byte[] signature, PublicKey publicKey, Pointer pointer, String userId, String projectId) {
+        Vin vin = new Vin();
+        vin.setSignature(signature);
+        vin.setFromUserId(userId);
+        vin.setFormProjectId(projectId);
+        vin.setPublicKey(publicKey);
+        vin.setToSpent(pointer);
+        return vin;
     }
 
     public void setUtxoService(UTXOService utxoService) {

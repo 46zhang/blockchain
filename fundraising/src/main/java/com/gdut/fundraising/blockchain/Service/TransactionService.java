@@ -20,7 +20,7 @@ public interface TransactionService {
      * @param money
      * @return
      */
-    Transaction createTransaction(Peer peer, String toAddress, long money);
+    Transaction createTransaction(Peer peer, String toAddress, long money, String projectId, String userId);
 
 
     /**
