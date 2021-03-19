@@ -1,6 +1,7 @@
 package com.gdut.fundraising.manager.impl;
 
 import com.alibaba.fastjson.JSON;
+import com.gdut.fundraising.constant.LogConstance;
 import com.gdut.fundraising.entities.raft.LogEntry;
 import com.gdut.fundraising.manager.RaftLogManager;
 import com.gdut.fundraising.util.FileUtils;
@@ -32,7 +33,7 @@ public class RaftLogManagerImpl implements RaftLogManager {
         Properties props = System.getProperties(); //系统属性
         String port = (String) props.get("port");
         //根据不同系统构建文件路径
-        pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port);
+        pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.BLOCK_CHAIN_PATH);
         logEntries = new LinkedList<>();
         //创建文件夹，该函数有做幂等操作，如果文件夹已存在则直接返回true
         FileUtils.createDir(pathName);

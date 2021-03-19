@@ -5,6 +5,8 @@ import org.apache.commons.codec.binary.StringUtils;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -18,11 +20,16 @@ class EccUtilTest {
         byte[] pk = keyPair.getPublic().getEncoded();
         byte[] sk = keyPair.getPrivate().getEncoded();
 
+
+
         KeyFactory keyFactory = null;
         PublicKey newPk=null;
         PrivateKey newSk=null;
         try {
+
+
             keyFactory = KeyFactory.getInstance("EC");
+
             newPk=keyFactory.generatePublic(new X509EncodedKeySpec(pk));
             newSk= keyFactory.generatePrivate(new PKCS8EncodedKeySpec(sk));
 
@@ -31,7 +38,7 @@ class EccUtilTest {
 //            System.out.println(byte2HexString(sk));
 //            System.out.println(byte2HexString(newSk.getEncoded()));
 
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException  e) {
             e.printStackTrace();
         }
         KeyPair keyPair1 = new KeyPair(newPk,newSk);

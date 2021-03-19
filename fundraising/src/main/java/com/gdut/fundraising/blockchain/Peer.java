@@ -1,13 +1,28 @@
 package com.gdut.fundraising.blockchain;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.gdut.fundraising.blockchain.Service.BlockChainService;
 import com.gdut.fundraising.blockchain.Service.TransactionService;
+import com.gdut.fundraising.constant.LogConstance;
+import com.gdut.fundraising.entities.raft.LogEntry;
+import com.gdut.fundraising.exception.BaseException;
+import com.gdut.fundraising.util.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+
+import javax.annotation.PreDestroy;
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.security.*;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.*;
 
 
 /**
@@ -16,6 +31,7 @@ import java.util.List;
 @Component
 public class Peer {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(Peer.class);
     /**
      * 区块链的数据，用volatile关键字声明，确保某个线程修改后，对其他线程可见
      */
@@ -84,10 +100,228 @@ public class Peer {
         orphanPool = new HashMap<>();
         transactionPool = new HashMap<>();
         blockChain = new ArrayList<>();
+        wallet = new Wallet();
+
+        Properties props = System.getProperties(); //系统属性
+        String port = (String) props.get("port");
+        //加载peer的属性
+        //loadAll(port);
+    }
+
+
+    @PreDestroy
+    /**
+     * 销毁前把数据存入文件，需要存入以下3种数据
+     * <1>waller</1>
+     * <2>utxoHashMap values</2>
+     * <3>transactionPol values</3>
+     */
+    public void writeData() {
+        Properties props = System.getProperties(); //系统属性
+        String port = (String) props.get("port");
+        writeData(port);
+    }
+
+
+    /**
+     * 销毁前把数据存入文件，需要存入以下3种数据
+     * <1>waller</1>
+     * <2>utxoHashMap values</2>
+     * <3>transactionPol values</3>
+     */
+    public void writeData(String port) {
+        String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port);
+        //创建目录，会保证幂等性
+        FileUtils.createDir(pathName);
+        pathName = FileUtils.buildPath(pathName, LogConstance.PEER_PATH);
+        //创建目录，会保证幂等性
+        FileUtils.createDir(pathName);
+
+        //write keypair
+        writeKeyPair(port);
+        //write transaction
+        writeTransactionValues(port);
+        //write utxo
+        writeUTXOValues(port);
+    }
+
+    /**
+     * 写入utxo
+     *
+     * @param port
+     */
+    private void writeUTXOValues(String port) {
+        String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_UTXO_PATH);
+        Collection<UTXO> collection = UTXOHashMap.values();
+        List<UTXO> utxos = new ArrayList<UTXO>(collection);
+        String data = JSON.toJSONString(utxos);
+        FileUtils.write(pathName, data);
+    }
+
+    /**
+     * 写入交易
+     *
+     * @param port
+     */
+    private void writeTransactionValues(String port) {
+        String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_TRANSACTION_PATH);
+        Collection<Transaction> collection = transactionPool.values();
+        List<Transaction> utxos = new ArrayList<Transaction>(collection);
+        String data = JSON.toJSONString(utxos);
+        FileUtils.write(pathName, data);
+    }
+
+    /**
+     * 写入公私密钥
+     *
+     * @param port
+     */
+    private void writeKeyPair(String port) {
+        String pathName1 = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_PK_PATH);
+        String pathName2 = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_SK_PATH);
+        String pathName3 = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_ADDR_PATH);
+        byte[] pk = wallet.getKeyPair().getPublic().getEncoded();
+        byte[] sk = wallet.getKeyPair().getPrivate().getEncoded();
+        String address = wallet.getAddress();
+        try {
+            FileUtils.write(pathName1, pk);
+            FileUtils.write(pathName2, sk);
+            FileUtils.write(pathName3, address);
+        } catch (Exception e) {
+            LOGGER.error("write key pair error!!!");
+        }
+    }
+
+    /**
+     * 写入钱包数据
+     *
+     * @param port
+     */
+    private void writeWallet(String port) {
+        String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_WALLET_PATH);
+        String data = JSON.toJSONString(wallet);
+        FileUtils.write(pathName, data);
+    }
+
+    /**
+     * 加载peer的配置项
+     *
+     * @param port
+     */
+    public void loadAll(String port) {
+        String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port);
+        //创建目录，会保证幂等性
+        FileUtils.createDir(pathName);
+        pathName = FileUtils.buildPath(pathName, LogConstance.PEER_PATH);
+        //创建目录，会保证幂等性
+        FileUtils.createDir(pathName);
+
+        //加载该节点的公私钥
+        loadKeyPair(port);
+        //加载该节点的交易池记录
+        loadTransaction(port);
+        //加载该节点的UTXO
+        loadUTXO(port);
+        //加载该节点的区块
+        loadBLockChain(port);
+
+    }
+
+    /**
+     * 加载钱包数据
+     *
+     * @param port
+     */
+    private void loadWallet(String port) {
+        String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_WALLET_PATH);
+        String data = FileUtils.read(pathName);
+        if (data == null) {
+            LOGGER.error("peer wallet钱包数据读取失败");
+            throw new BaseException(400, "区块链节点本地数据初始化失败!!!");
+        } else {
+            wallet = JSON.parseObject(data, Wallet.class);
+        }
+
+    }
+
+    private void loadKeyPair(String port) {
+        String pathName1 = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_PK_PATH);
+        String pathName2 = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_SK_PATH);
+        String pathName3 = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_ADDR_PATH);
+        byte[] bpk = FileUtils.readBin(pathName1);
+        byte[] bsk = FileUtils.readBin(pathName2);
+        String addr=FileUtils.read(pathName3);
+        try {
+            KeyFactory keyFactory = KeyFactory.getInstance("EC");
+            PublicKey pk = keyFactory.generatePublic(new X509EncodedKeySpec(bpk));
+            PrivateKey sk = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(bsk));
+            KeyPair keyPair = new KeyPair(pk, sk);
+            wallet.setKeyPair(keyPair);
+            wallet.setAddress(addr);
+
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            LOGGER.error("peer wallet钱包数据读取失败");
+            throw new BaseException(400, "区块链节点本地数据初始化失败!!!");
+        }
+
+    }
+
+    private void loadBLockChain(String port) {
+        String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.BLOCK_CHAIN_PATH);
+        String[] fileNames = FileUtils.getAllFileNameInDir(pathName);
+        if(fileNames==null || fileNames.length<=0){
+            return;
+        }
+        for (String file : fileNames) {
+            String data = FileUtils.read(FileUtils.buildPath(pathName, file));
+            if (data != null) {
+                LogEntry entry = JSON.parseObject(data, LogEntry.class);
+                //添加区块数据
+                blockChain.add(entry.getData());
+            }
+        }
+        LOGGER.info("================区块链数组初始化完成=====================");
+    }
+
+    private void loadUTXO(String port) {
+        String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_UTXO_PATH);
+        String data = FileUtils.read(pathName);
+        if (data == null) {
+            LOGGER.error("peer utxo数据读取失败");
+            throw new BaseException(400, "区块链节点本地数据初始化失败!!!");
+        } else {
+//            JSONArray jsonArray= JSONArray.parseArray(data);
+//            for(Iterator iterator=jsonArray.iterator();iterator.hasNext();){
+//                JSONObject jsonObject=(JSONObject) iterator.next();
+//            }
+            List<UTXO> list = JSON.parseArray(data, UTXO.class);
+            //初始化hashMap
+            for (int i = 0; i < list.size(); ++i) {
+                UTXOHashMap.put(list.get(i).getPointer(), list.get(i));
+            }
+        }
+        LOGGER.info("================UTXO Map初始化完成=====================");
+    }
+
+    private void loadTransaction(String port) {
+        String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_TRANSACTION_PATH);
+        String data = FileUtils.read(pathName);
+        if (data == null) {
+            LOGGER.error("peer transaction数据读取失败");
+            throw new BaseException(400, "区块链节点本地数据初始化失败!!!");
+        } else {
+            List<Transaction> list = JSON.parseArray(data, Transaction.class);
+            //初始化 transactionPool
+            for (int i = 0; i < list.size(); ++i) {
+                transactionPool.put(list.get(i).getId(), list.get(i));
+            }
+        }
+        LOGGER.info("================transactionPool 数据初始化完成=====================");
+
     }
 
     //TODO 注意要看看是否存在未确认的utxo
-    public long getBalance(String address,String projectId) {
+    public long getBalance(String address, String projectId) {
         long money = 0;
         for (UTXO utxo : UTXOHashMap.values()) {
             //必须找到地址一致且金额足够的utxo

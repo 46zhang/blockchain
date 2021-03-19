@@ -1,6 +1,8 @@
 package com.gdut.fundraising;
 
 
+import com.alibaba.fastjson.JSON;
+import com.gdut.fundraising.blockchain.Block;
 import com.gdut.fundraising.dto.ReadDonationResult;
 import com.gdut.fundraising.dto.raft.VoteRequest;
 import com.gdut.fundraising.mapper.UserMapper;
@@ -32,6 +34,9 @@ class FundraisingApplicationTests {
         System.out.println(s);
     }
 
+    /**
+     * 测试区块共识
+     */
     @Test
     void sendData(){
         String url="http://localhost:8091"+"/fundraising/node/send";
@@ -40,11 +45,15 @@ class FundraisingApplicationTests {
         int count=0;
         while(true) {
             try {
-                com.gdut.fundraising.entities.raft.Test t=new com.gdut.fundraising.entities.raft.Test();
-                String data=new Date().toString();
-                t.setData(data);
-                String res= NetworkUtils.postByHttp(url,t);
+                Block block=new Block();
+                block.setVersion("1.0");
+                Date date = new Date();
+                block.setTime(date);
+                block.setHeight(1);
+                block.setHash("hash"+date.toString());
+                String res= NetworkUtils.postByHttp(url,block);
                 System.out.println(res);
+                String data= JSON.toJSONString(block);
                 FileUtils.write(FileUtils.buildPath(pathName, count +".json"),data);
                 ++count;
                 //1min发一次
@@ -56,6 +65,7 @@ class FundraisingApplicationTests {
             }
         }
     }
+
 
 
 }
