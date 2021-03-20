@@ -24,6 +24,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private UTXOService utxoService;
 
+
     /**
      * 创建交易
      *
@@ -35,7 +36,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      */
     @Override
-    public Transaction createTransaction(Peer peer, String toAddress, long money,
+    public synchronized Transaction createTransaction(Peer peer, String toAddress, long money,
                                          String projectId, String userId) {
         long balance = peer.getBalance(peer.getWallet().getAddress(),projectId);
         //余额不足
@@ -239,7 +240,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      */
     @Override
-    public Transaction createCoinBaseTransaction(Peer peer, String toAddress,
+    public synchronized  Transaction createCoinBaseTransaction(Peer peer, String toAddress,
                                                  String userId, String projectId, long money) {
         Transaction transaction = new Transaction();
         List<Vin> vinList = new ArrayList<>();
