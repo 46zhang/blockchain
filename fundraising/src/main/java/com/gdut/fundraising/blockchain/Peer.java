@@ -15,9 +15,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
+import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.io.File;
-import java.io.UnsupportedEncodingException;
+
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -101,13 +101,16 @@ public class Peer {
         transactionPool = new HashMap<>();
         blockChain = new ArrayList<>();
         wallet = new Wallet();
+    }
 
+    @PostConstruct
+    public void loadPeerInitData(){
         Properties props = System.getProperties(); //系统属性
         String port = (String) props.get("port");
         //加载peer的属性
-        //loadAll(port);
+        //TODO 在测试的时候要屏蔽该行
+        loadAll(port);
     }
-
 
     @PreDestroy
     /**
@@ -250,7 +253,7 @@ public class Peer {
         String pathName3 = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_ADDR_PATH);
         byte[] bpk = FileUtils.readBin(pathName1);
         byte[] bsk = FileUtils.readBin(pathName2);
-        String addr=FileUtils.read(pathName3);
+        String addr = FileUtils.read(pathName3);
         try {
             KeyFactory keyFactory = KeyFactory.getInstance("EC");
             PublicKey pk = keyFactory.generatePublic(new X509EncodedKeySpec(bpk));
@@ -269,7 +272,7 @@ public class Peer {
     private void loadBLockChain(String port) {
         String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.BLOCK_CHAIN_PATH);
         String[] fileNames = FileUtils.getAllFileNameInDir(pathName);
-        if(fileNames==null || fileNames.length<=0){
+        if (fileNames == null || fileNames.length <= 0) {
             return;
         }
         for (String file : fileNames) {

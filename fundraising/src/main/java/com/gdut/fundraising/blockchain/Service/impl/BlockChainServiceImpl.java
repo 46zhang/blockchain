@@ -76,6 +76,9 @@ public class BlockChainServiceImpl implements BlockChainService {
     @Override
     public synchronized boolean addBlockToChain(Peer peer, Block block) {
         List<Block> blockChain = peer.getBlockChain();
+        //测试代码
+        blockChain.add(block);
+
         //计算该区块应该位于哪个高度
         long height = calculateBlockHeight(blockChain, block);
         //说明应该添加到最后一块

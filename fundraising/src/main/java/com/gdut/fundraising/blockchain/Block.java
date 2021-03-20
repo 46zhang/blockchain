@@ -50,6 +50,19 @@ public class Block {
         return version + preBlockHash + merkleRootHash + time.toString();
     }
 
+    @Override
+    public String toString() {
+        return "Block{" +
+                ",version='" + version + '\'' +
+                ",preBlockHash=" + preBlockHash + '\'' +
+                ",merkleRootHash='" + merkleRootHash + '\'' +
+                ",hash=" + hash + '\'' +
+                ",txs='" + txs + '\'' +
+                ",time=" + time + '\'' +
+                ",height='" + height + '\'' +
+                '}';
+    }
+
     public long getHeight() {
         return height;
     }
