@@ -11,6 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SpendEntity {
     /**
+     * 交易id
+     */
+    private String txId;
+
+    /**
      *项目发起者的id
      */
     private String formUserId;
@@ -39,6 +44,7 @@ public class SpendEntity {
      * 订单的描述
      */
     private String orderExplain;
+
 
 
     public String getOrderTime(){

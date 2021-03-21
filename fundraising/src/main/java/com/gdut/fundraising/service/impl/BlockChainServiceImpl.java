@@ -1,10 +1,9 @@
 package com.gdut.fundraising.service.impl;
 
-import com.gdut.fundraising.blockchain.Block;
-import com.gdut.fundraising.blockchain.Peer;
+import com.gdut.fundraising.blockchain.*;
 import com.gdut.fundraising.blockchain.Service.TransactionService;
-import com.gdut.fundraising.blockchain.Transaction;
 import com.gdut.fundraising.constant.raft.NodeStatus;
+import com.gdut.fundraising.entities.FundFlowEntity;
 import com.gdut.fundraising.entities.SpendEntity;
 import com.gdut.fundraising.entities.raft.BlockChainNode;
 import com.gdut.fundraising.exception.BaseException;
@@ -155,6 +154,109 @@ public class BlockChainServiceImpl implements BlockChainService {
         return peer.getBlockChainService().addBlockToChain(peer, block);
     }
 
+//    /**
+//     * 获取某个捐款的全部资金使用记录
+//     *
+//     * @param txId
+//     * @return
+//     */
+//    @Override
+//    public List<FundFlowEntity> getTransactionFundFlowByBlockChain(String txId) {
+//        List<FundFlowEntity> fundFlowEntities = new ArrayList<>();
+//        List<Block> blockChain = blockChainNode.getPeer().getBlockChain();
+//        String aimTxId = txId;
+//        //需要获取溯源该txId中的交易数据,找出其本身的交易以及其后续的交易
+//        //后续交易的意思就是 A交易产生了 utxoA ，B交易使用utxoA作为输入单元，那么B就为A的后续交易，同理可得后续可能会有交易C、D
+//        //因此要找出所有的相关交易
+//        for (Block block : blockChain) {
+//            for (Transaction tx : block.getTxs()) {
+//                //同个交易的话直接构建资金流信息
+//                if (tx.getId().equals(aimTxId)) {
+//                    long sum = 0;
+//                    for (Vout vout : tx.getOutList()) {
+//                        sum += vout.getMoney();
+//                    }
+//                    //构建资金流信息
+//                    FundFlowEntity fundFlowEntity = buildFundFlowEntity(tx,block);
+//
+//                    fundFlowEntities.add(fundFlowEntity);
+//                } else {
+//                    //判断是否有人用txId的vout作为输入单元，有的话相当于就是使用了该txId的钱来做输入
+//                    List<Vin> vins = tx.getInList();
+//                    for(Vin vin:vins){
+//                        if(vin.getToSpent().getTxId().equals(aimTxId)){
+//                            //更新新的交易id
+//                            aimTxId=tx.getId();
+//
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        return null;
+//    }
+
+    /**
+     * 获取所有用户捐款
+     *
+     * @param userId
+     * @return
+     */
+    @Override
+    public List<FundFlowEntity> getUserAllContributionFlow(String userId) {
+        List<FundFlowEntity> fundFlowEntities = new ArrayList<>();
+        List<Block> blockChain = blockChainNode.getPeer().getBlockChain();
+
+        for (int i = blockChain.size() - 1; i >= 0; --i) {
+            Block block = blockChain.get(i);
+            //实际上时间复杂度不会很高，因为每个block只有1-2个transaction
+            for (Transaction tx : block.getTxs()) {
+                //获取用户的所有捐款信息，捐款全部都是创币交易
+                if (tx.getFromUserId().equals(userId) && tx.isCoinBase()) {
+                    FundFlowEntity fundFlowEntity = buildFundFlowEntity(tx, block);
+                    fundFlowEntities.add(fundFlowEntity);
+                }
+            }
+        }
+        return fundFlowEntities;
+    }
+
+    @Override
+    public List<FundFlowEntity> getUserProjectAllFundFlow(String userId, String projectId) {
+        List<FundFlowEntity> fundFlowEntities = new ArrayList<>();
+        List<Block> blockChain = blockChainNode.getPeer().getBlockChain();
+
+        for (int i = blockChain.size() - 1; i >= 0; --i) {
+            Block block = blockChain.get(i);
+            //实际上时间复杂度不会很高，因为每个block只有1-2个transaction
+            for (Transaction tx : block.getTxs()) {
+                if (tx.getFromUserId().equals(userId) && tx.getFormProjectId().equals(projectId)) {
+                    FundFlowEntity fundFlowEntity = buildFundFlowEntity(tx, block);
+                    fundFlowEntities.add(fundFlowEntity);
+                }
+            }
+        }
+        return fundFlowEntities;
+    }
+
+    @Override
+    public List<FundFlowEntity> getProjectFundFlow(String projectId) {
+        List<FundFlowEntity> fundFlowEntities = new ArrayList<>();
+        List<Block> blockChain = blockChainNode.getPeer().getBlockChain();
+
+        for (int i = blockChain.size() - 1; i >= 0; --i) {
+            Block block = blockChain.get(i);
+            //实际上时间复杂度不会很高，因为每个block只有1-2个transaction
+            for (Transaction tx : block.getTxs()) {
+                if (tx.getFormProjectId().equals(projectId)) {
+                    FundFlowEntity fundFlowEntity = buildFundFlowEntity(tx, block);
+                    fundFlowEntities.add(fundFlowEntity);
+                }
+            }
+        }
+        return fundFlowEntities;
+    }
+
     /**
      * 创建区块
      *
@@ -170,6 +272,38 @@ public class BlockChainServiceImpl implements BlockChainService {
         List<Transaction> txs = new ArrayList<Transaction>(collection);
         Block block = peer.getBlockChainService().createCandidateBlock(txs, preBlock);
         return block;
+    }
+
+    /**
+     * 构建资金流实体
+     *
+     * @param tx
+     * @param block
+     * @return
+     */
+    private FundFlowEntity buildFundFlowEntity(Transaction tx, Block block) {
+        long sum = 0;
+        for (Vout vout : tx.getOutList()) {
+            sum += vout.getMoney();
+        }
+        //构建资金流信息
+        FundFlowEntity fundFlowEntity = new FundFlowEntity();
+        fundFlowEntity.setBlockHash(block.getHash());
+        fundFlowEntity.setMoney(sum);
+        fundFlowEntity.setProjectId(tx.getFormProjectId());
+        fundFlowEntity.setUserId(tx.getFromUserId());
+        fundFlowEntity.setTime(tx.getLockTime());
+        fundFlowEntity.setTo(tx.getOutList().get(0).getToAddress());
+        fundFlowEntity.setTxId(tx.getId());
+
+        //如果是创币交易不需要设置输入地址
+        if (!tx.isCoinBase()) {
+            //同一个交易的所有vin地址都一样，所以选第一个就好
+            String vinAddress = EccUtil.generateAddress(tx.getInList().get(0).getPublicKey().getEncoded());
+            fundFlowEntity.setFrom(vinAddress);
+        }
+
+        return fundFlowEntity;
     }
 
 

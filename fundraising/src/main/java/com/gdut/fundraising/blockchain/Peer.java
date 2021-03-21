@@ -100,6 +100,7 @@ public class Peer {
         orphanPool = new HashMap<>();
         transactionPool = new HashMap<>();
         blockChain = new ArrayList<>();
+        transactionPoolBackup=new HashMap<>();
         wallet = new Wallet();
     }
 

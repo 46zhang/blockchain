@@ -38,23 +38,23 @@ public class NetworkServiceImpl implements NetworkService {
         return jsonResult;
     }
 
-    public static void main(String[] args) {
-        NetworkService networkService = new NetworkServiceImpl();
-        VoteRequest voteRequest = new VoteRequest();
-        voteRequest.setCandidateId("localhost:8091");
-        voteRequest.setLastLogIndex(0);
-        voteRequest.setLastLogTerm(0);
-        voteRequest.setTerm(100);
-        try {
-            JsonResult result = networkService.post("localhost", "8092", voteRequest);
-            System.out.println(result.getData());
-            ObjectMapper mapper = new ObjectMapper();
-
-            VoteResult voteResult = mapper.convertValue(result.getData(), VoteResult.class);
-            System.out.println(voteResult.getTerm());
-            System.out.println(result);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    public static void main(String[] args) {
+//        NetworkService networkService = new NetworkServiceImpl();
+//        VoteRequest voteRequest = new VoteRequest();
+//        voteRequest.setCandidateId("localhost:8091");
+//        voteRequest.setLastLogIndex(0);
+//        voteRequest.setLastLogTerm(0);
+//        voteRequest.setTerm(100);
+//        try {
+//            JsonResult result = networkService.post("localhost", "8092", voteRequest);
+//            System.out.println(result.getData());
+//            ObjectMapper mapper = new ObjectMapper();
+//
+//            VoteResult voteResult = mapper.convertValue(result.getData(), VoteResult.class);
+//            System.out.println(voteResult.getTerm());
+//            System.out.println(result);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

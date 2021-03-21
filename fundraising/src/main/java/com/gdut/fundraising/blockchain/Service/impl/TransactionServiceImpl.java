@@ -11,10 +11,7 @@ import org.springframework.util.ObjectUtils;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -116,6 +113,7 @@ public class TransactionServiceImpl implements TransactionService {
         //设置项目信息
         transaction.setFromUserId(userId);
         transaction.setFormProjectId(projectId);
+        transaction.setLockTime(new Date());
 
         //插入到交易池
         addTransaction(peer, transaction);
@@ -259,7 +257,7 @@ public class TransactionServiceImpl implements TransactionService {
         //创币交易
         transaction.setCoinBase(true);
         transaction.setId(Sha256Util.doubleSHA256(transaction.toString()));
-
+        transaction.setLockTime(new Date());
         transaction.setFromUserId(userId);
         transaction.setFormProjectId(projectId);
 

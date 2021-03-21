@@ -2,6 +2,7 @@ package com.gdut.fundraising.service;
 
 import com.gdut.fundraising.blockchain.Block;
 import com.gdut.fundraising.blockchain.Transaction;
+import com.gdut.fundraising.entities.FundFlowEntity;
 import com.gdut.fundraising.entities.SpendEntity;
 
 import java.util.List;
@@ -35,4 +36,34 @@ public interface BlockChainService {
      * @return
      */
     boolean addBlockToChain(Block block);
+
+//    /**
+//     * txId 来查询某笔捐款的所有资金流动记录
+//     * @param txId
+//     * @return
+//     */
+//    List<FundFlowEntity> getTransactionFundFlowByBlockChain(String txId);
+
+
+    /**
+     * userId 来查询某个用户的所有捐款记录
+     * @param userId
+     * @return
+     */
+    List<FundFlowEntity> getUserAllContributionFlow(String userId);
+
+    /**
+     * userId 来查询某个用户对某个项目的所有资金流动情况
+     * @param userId
+     * @return
+     */
+    List<FundFlowEntity> getUserProjectAllFundFlow(String userId,String projectId);
+
+
+    /**
+     * 查询某个项目资金流动的情况
+     * @param projectId
+     * @return
+     */
+    List<FundFlowEntity> getProjectFundFlow(String projectId);
 }

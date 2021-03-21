@@ -31,6 +31,11 @@ public class Vin {
      */
     private String fromUserId;
 
+//    /**
+//     * 金额
+//     */
+//    private Long money;
+
 
     public byte[] getSignature() {
         return signature;
@@ -71,4 +76,12 @@ public class Vin {
     public void setFromUserId(String fromUserId) {
         this.fromUserId = fromUserId;
     }
+
+//    public Long getMoney() {
+//        return money;
+//    }
+//
+//    public void setMoney(Long money) {
+//        this.money = money;
+//    }
 }

@@ -6,6 +6,7 @@ import com.gdut.fundraising.blockchain.Service.impl.MerkleTreeServiceImpl;
 import com.gdut.fundraising.blockchain.Service.impl.TransactionServiceImpl;
 import com.gdut.fundraising.blockchain.Service.impl.UTXOServiceImpl;
 import com.gdut.fundraising.constant.raft.NodeStatus;
+import com.gdut.fundraising.entities.FundFlowEntity;
 import com.gdut.fundraising.entities.SpendEntity;
 import com.gdut.fundraising.entities.raft.BlockChainNode;
 import org.mockito.InjectMocks;
@@ -17,6 +18,7 @@ import org.testng.annotations.Test;
 
 import java.security.PublicKey;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -31,10 +33,14 @@ public class BlockChainServiceImplTest {
     @Mock
     BlockChainNode blockChainNode;
 
+    private Wallet wallet;
+
 
     @BeforeMethod
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        wallet = new Wallet();
+        wallet.generateKeyAndAddress();
     }
 
     @Test
@@ -146,6 +152,127 @@ public class BlockChainServiceImplTest {
 
     @Test
     public void testAddBlockToChain() {
+    }
+
+    @Test
+    public void testgetProjectFundFlow() {
+        String projectId = "asfafacxxxxx";
+        String userId = "2412423edasdas";
+        List<Block> blockList = new ArrayList<>();
+        Peer peer = new Peer();
+        peer.getWallet().generateKeyAndAddress();
+
+        when(blockChainNode.getPeer()).thenReturn(peer);
+
+        blockList.add(buildBlock(0, true, null, projectId, userId));
+        blockList.add(buildBlock(0, false, null, projectId, userId));
+        blockList.add(buildBlock(0, true, null, projectId + "fsaf", userId));
+
+
+        peer.setBlockChain(blockList);
+        List<FundFlowEntity> fundFlowEntities = blockChainService.getProjectFundFlow(projectId);
+
+        Assert.assertEquals(fundFlowEntities.size(), 2);
+        Assert.assertEquals(fundFlowEntities.get(0).getTxId(), blockList.get(1).getTxs().get(0).getId());
+        Assert.assertEquals(fundFlowEntities.get(0).getTo(), wallet.getAddress());
+
+        Assert.assertEquals(fundFlowEntities.get(1).getTxId(), blockList.get(0).getTxs().get(0).getId());
+        Assert.assertEquals(fundFlowEntities.get(1).getTo(), wallet.getAddress());
+    }
+
+    @Test
+    public void testGetUserProjectAllFundFlow() {
+        String projectId = "asfafacxxxxx";
+        String userId = "2412423edasdas";
+        List<Block> blockList = new ArrayList<>();
+        Peer peer = new Peer();
+        peer.getWallet().generateKeyAndAddress();
+
+        when(blockChainNode.getPeer()).thenReturn(peer);
+
+        blockList.add(buildBlock(0, true, null, projectId, userId));
+        blockList.add(buildBlock(0, false, null, projectId, userId));
+        blockList.add(buildBlock(0, true, null, projectId + "fsaf", userId));
+
+
+        peer.setBlockChain(blockList);
+        List<FundFlowEntity> fundFlowEntities = blockChainService.getUserProjectAllFundFlow(userId,projectId);
+
+        Assert.assertEquals(fundFlowEntities.size(), 2);
+        Assert.assertEquals(fundFlowEntities.get(0).getTxId(), blockList.get(1).getTxs().get(0).getId());
+        Assert.assertEquals(fundFlowEntities.get(0).getTo(), wallet.getAddress());
+
+        Assert.assertEquals(fundFlowEntities.get(1).getTxId(), blockList.get(0).getTxs().get(0).getId());
+        Assert.assertEquals(fundFlowEntities.get(1).getTo(), wallet.getAddress());
+    }
+
+
+    @Test
+    public void testGetUserAllFundFlow() {
+        String projectId = "asfafacxxxxx";
+        String userId = "2412423edasdas";
+        List<Block> blockList = new ArrayList<>();
+        Peer peer = new Peer();
+        peer.getWallet().generateKeyAndAddress();
+
+        when(blockChainNode.getPeer()).thenReturn(peer);
+
+        blockList.add(buildBlock(0, true, null, projectId, userId));
+        blockList.add(buildBlock(0, false, null, projectId, userId));
+        blockList.add(buildBlock(0, false, null, projectId + "fsaf", userId));
+
+
+        peer.setBlockChain(blockList);
+        List<FundFlowEntity> fundFlowEntities = blockChainService.getUserAllContributionFlow(userId);
+
+        Assert.assertEquals(fundFlowEntities.size(), 1);
+        Assert.assertEquals(fundFlowEntities.get(0).getTxId(), blockList.get(0).getTxs().get(0).getId());
+        Assert.assertEquals(fundFlowEntities.get(0).getTo(), wallet.getAddress());
+        Assert.assertEquals(fundFlowEntities.get(0).getBlockHash(),blockList.get(0).getHash());
+        Assert.assertNull(fundFlowEntities.get(0).getFrom());
+    }
+
+
+
+    private Block buildBlock(int height, boolean coinBase, String preHash, String projectId, String userId) {
+        Block block = new Block();
+        List<Transaction> txs = new ArrayList<>();
+        txs.add(buildTransaction(coinBase, 0, new Date(), projectId, userId));
+        block.setTxs(txs);
+        MerkleTreeServiceImpl merkleTreeServiceImpl = new MerkleTreeServiceImpl();
+        block.setMerkleRootHash(merkleTreeServiceImpl.getMerkleRoot(txs));
+        block.setHeight(height);
+        block.setPreBlockHash(preHash);
+        block.setVersion(BlockChainConstant.VERSION);
+        block.setTime(new Date());
+        block.setHash(Sha256Util.doubleSHA256(block.getHeader()));
+        return block;
+    }
+
+
+    private Transaction buildTransaction(boolean coinBase, long fee, Date lockTime, String projectId, String userId) {
+        Transaction transaction = new Transaction();
+        List<Vout> vouts = new ArrayList<>();
+        Vout vout = new Vout();
+        vout.setMoney(100L);
+        vouts.add(vout);
+        vout.setToAddress(wallet.getAddress());
+
+        List<Vin> vins = new ArrayList<>();
+        Vin vin = new Vin();
+        vin.setPublicKey(wallet.getKeyPair().getPublic());
+        vins.add(vin);
+
+        transaction.setLockTime(lockTime);
+        transaction.setFee(fee);
+        transaction.setCoinBase(coinBase);
+        transaction.setId(Sha256Util.doubleSHA256(transaction.toString()));
+        transaction.setFormProjectId(projectId);
+        transaction.setFromUserId(userId);
+        transaction.setOutList(vouts);
+        transaction.setInList(vins);
+
+        return transaction;
     }
 
     private Peer initPeer() {

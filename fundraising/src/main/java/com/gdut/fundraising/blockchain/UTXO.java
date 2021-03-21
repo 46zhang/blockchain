@@ -1,6 +1,6 @@
 package com.gdut.fundraising.blockchain;
 
-import java.util.Map;
+
 
 /**
  * 未消费交易输出模块
@@ -41,10 +41,6 @@ public class UTXO {
      */
     private String fromUserId;
 
-
-    public String encodeString() {
-        return pointer.getTxId() + pointer.getN();
-    }
 
     @Override
     public String toString() {
