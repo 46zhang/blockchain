@@ -64,6 +64,14 @@ public class Transaction {
         this.inList = inList;
     }
 
+    /**
+     * 获取输出金额，不包括找零
+     * @return
+     */
+    public Long getOutputMoneyNoIncludeChange(){
+        return outList.get(0).getMoney();
+    }
+
     public List<Vout> getOutList() {
         return outList;
     }

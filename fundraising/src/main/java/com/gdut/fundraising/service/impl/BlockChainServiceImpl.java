@@ -282,10 +282,13 @@ public class BlockChainServiceImpl implements BlockChainService {
      * @return
      */
     private FundFlowEntity buildFundFlowEntity(Transaction tx, Block block) {
-        long sum = 0;
-        for (Vout vout : tx.getOutList()) {
-            sum += vout.getMoney();
-        }
+//        long sum = 0;
+//        for (Vout vout : tx.getOutList()) {
+//            sum += vout.getMoney();
+//        }
+        //获取输出金额，不包括找零
+        long sum = tx.getOutputMoneyNoIncludeChange();
+
         //构建资金流信息
         FundFlowEntity fundFlowEntity = new FundFlowEntity();
         fundFlowEntity.setBlockHash(block.getHash());
