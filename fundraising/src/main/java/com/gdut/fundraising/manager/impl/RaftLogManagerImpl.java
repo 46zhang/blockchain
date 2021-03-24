@@ -106,6 +106,7 @@ public class RaftLogManagerImpl implements RaftLogManager {
     @Override
     public LogEntry read(long index) {
         if (index <= logEntries.size()) {
+            LOGGER.info("log manager read index:{},size:{}",index,logEntries.size());
             return logEntries.get((int) index - 1);
         }
         return null;

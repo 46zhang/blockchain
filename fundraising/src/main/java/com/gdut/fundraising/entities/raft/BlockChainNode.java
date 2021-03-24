@@ -149,7 +149,7 @@ public class BlockChainNode extends DefaultNode {
         int count = 0;
         //给每个节点同步数据
         for (NodeInfo nodeInfo : nodeInfoSet.getNodeExceptSelf()) {
-            //如果节点不存活，直接跳过，省去等待时间
+//           //TODO 是否要加这一步优化流程 如果节点不存活，直接跳过，省去等待时间
 //            if(!nodeInfo.isAlive()){
 //                continue;
 //            }
@@ -264,6 +264,7 @@ public class BlockChainNode extends DefaultNode {
                 LinkedList<LogEntry> logEntries = new LinkedList<>();
                 if (logEntry.getIndex() >= nextIndex) {
                     for (long i = nextIndex; i <= logEntry.getIndex(); i++) {
+                       // LOGGER.info("write data i: {}", i);
                         LogEntry l = raftLogManager.read(i);
                         if (l != null) {
                             logEntries.add(l);
@@ -276,7 +277,7 @@ public class BlockChainNode extends DefaultNode {
                 LogEntry preLog = logEntries.getFirst();
                 appendLogRequest.setEntries(logEntries.toArray(new LogEntry[0]));
                 appendLogRequest.setPreLogTerm(preLog.getTerm());
-                appendLogRequest.setPrevLogIndex(preLog.getIndex());
+                appendLogRequest.setPrevLogIndex(preLog.getIndex()-1);
                 appendLogRequest.setType(MessageType.APPEND_LOG.getValue());
                 try {
                     JsonResult response = networkService.post(nodeInfo.getIp(),
@@ -305,11 +306,12 @@ public class BlockChainNode extends DefaultNode {
                             return false;
                         } // 没我大, 却失败了,说明 index 不对.或者 term 不对.
                         else {
+                            nextIndex -= 1;
                             // 递减
                             if (nextIndex == 0) {
                                 nextIndex = 1L;
                             }
-                            nextIndexs.put(nodeInfo, nextIndex - 1);
+                            nextIndexs.put(nodeInfo, nextIndex);
                             LOGGER.warn("follower {} nextIndex not match, will reduce nextIndex and retry request" +
                                             "append, nextIndex : [{}]", nodeInfo.getId(),
                                     nextIndex);

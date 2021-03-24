@@ -130,6 +130,7 @@ public class BCTServiceImplTest {
         spendEntity.setToAddress("xxx");
         spendEntity.setProjectId(projectId);
         spendEntity.setMoney(money);
+        spendEntity.setFormUserId(userId);
 
         Peer peer = initPeer();
         UTXO utxo = getUTXO(peer.getWallet().getKeyPair().getPublic(), peer.getWallet().getAddress(), userId, projectId);

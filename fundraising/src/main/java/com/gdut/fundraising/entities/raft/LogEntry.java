@@ -15,7 +15,7 @@ public class LogEntry {
         return "LogEntry{" +
                 "index='" + index + '\'' +
                 ", term=" + term + '\'' +
-                "data='" + data +
+                "data='" + data.toString() +
                 '}';
     }
 

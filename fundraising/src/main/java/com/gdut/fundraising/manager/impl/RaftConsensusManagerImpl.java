@@ -80,6 +80,7 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
     /**
      * 添加日志
      * 更新区块链
+     *
      * @param param
      * @param node
      * @return
@@ -165,9 +166,12 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
                     LOGGER.error("write data to log fail!! log: {}", entry);
                     return result;
                 }
-                //更新当前区块链
+                //只更新后面的区块链,例如之前已经有1块区块了，那么只从区块2开始添加，之前的区块不变化，不可篡改
                 Peer peer = node.getPeer();
-                res = peer.getBlockChainService().addBlockToChain(peer, entry.getData());
+                if (entry.getIndex() > peer.getBlockChain().size()) {
+                    res = peer.getBlockChainService().addBlockToChain(peer, entry.getData());
+                }
+
                 if (!res) {
                     LOGGER.error("add block to chain fail!! log: {}", entry);
                     return result;

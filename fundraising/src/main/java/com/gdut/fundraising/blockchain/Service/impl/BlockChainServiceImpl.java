@@ -8,6 +8,7 @@ import com.gdut.fundraising.blockchain.Service.UTXOService;
 import com.gdut.fundraising.exception.BaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -17,11 +18,15 @@ public class BlockChainServiceImpl implements BlockChainService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlockChainServiceImpl.class);
 
+    @Autowired
     MerkleTreeService merkleTreeService;
 
+    @Autowired
     TransactionService transactionService;
 
+    @Autowired
     UTXOService utxoService;
+
 
     /**
      * 创建候选区块
@@ -86,20 +91,8 @@ public class BlockChainServiceImpl implements BlockChainService {
             blockChain.add(block);
             //更新UTXOSet和交易池
             receiveBlockAtEndOfChain(peer, block.getTxs());
-        } else if (height == blockChain.size() - 1) {
-            throw new BaseException(400,"区块位置计算出错");
-//            //末尾的前一块，则需要把原先的最后一块回滚，再插入
-//            Block lastBlock = blockChain.get(blockChain.size() - 1);
-//            //hash是16进制字符串
-//            //TODO 根据投票判断是否要回滚当前模块
-//            // 重点测试为什么哈希值小就要保留该区块，哈希值大小怎么决定，以及保留的原因
-//
-//            //否则，删除掉最后的区块，将其替换为新的区块
-//            blockChain.remove(blockChain.size() - 1);
-//            blockChain.add(block);
-//            updateBlockAtEndOfChain(peer, block.getTxs());
-
         } else {
+            LOGGER.error("区块位置计算出错 block: {} height:{}", block, height);
             //其他位置return false
             return false;
         }
@@ -196,7 +189,7 @@ public class BlockChainServiceImpl implements BlockChainService {
     private long calculateBlockHeight(List<Block> blockChain, Block block) {
         if (blockChain.size() == 0) {
             return 0;
-        } else if (blockChain.size() == 1 &&  blockChain.get(0).getHash().equals(block.getHash())) {
+        } else if (blockChain.size() == 1 && blockChain.get(0).getHash().equals(block.getHash())) {
             //第一个区块
             return 0;
         }

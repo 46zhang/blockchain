@@ -6,6 +6,7 @@ import com.gdut.fundraising.blockchain.Service.UTXOService;
 import com.gdut.fundraising.exception.BaseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
@@ -19,6 +20,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     private static String ALGORITHM_NAME = "SHA256withECDSA";
 
+    @Autowired
     private UTXOService utxoService;
 
 
@@ -34,8 +36,8 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     public synchronized Transaction createTransaction(Peer peer, String toAddress, long money,
-                                         String projectId, String userId) {
-        long balance = peer.getBalance(peer.getWallet().getAddress(),projectId);
+                                                      String projectId, String userId) {
+        long balance = peer.getBalance(peer.getWallet().getAddress(), userId, projectId);
         //余额不足
         if (balance < money) {
             LOGGER.error("utxo: {},money:{},toAddress:{},projectId:{},userId:{}",
@@ -54,6 +56,11 @@ public class TransactionServiceImpl implements TransactionService {
 
             //不是同一个项目的utxo不能使用，不累加金钱
             if (!utxo.getFormProjectId().equals(projectId)) {
+                continue;
+            }
+
+            //不是同一个用户的utxo不能使用，不累加金钱
+            if (!utxo.getFromUserId().equals(userId)) {
                 continue;
             }
 
@@ -239,8 +246,8 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      */
     @Override
-    public synchronized  Transaction createCoinBaseTransaction(Peer peer, String toAddress,
-                                                 String userId, String projectId, long money) {
+    public synchronized Transaction createCoinBaseTransaction(Peer peer, String toAddress,
+                                                              String userId, String projectId, long money) {
         Transaction transaction = new Transaction();
         List<Vin> vinList = new ArrayList<>();
         List<Vout> voutList = new ArrayList<>();

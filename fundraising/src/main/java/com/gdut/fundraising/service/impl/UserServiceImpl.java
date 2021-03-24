@@ -196,10 +196,13 @@ public class UserServiceImpl implements UserService {
             if (userMapper.contributionUpdateProject(gift.getGiftMoney(), gift.getProjectId()) != 1) {
                 throw new BaseException(400, "项目未找到或项目不在募捐状态！");
             }
-            BCTService.contribution(gift.getUserId(), gift.getProjectId(), gift.getGiftMoney());
+            boolean res= BCTService.contribution(gift.getUserId(), gift.getProjectId(), gift.getGiftMoney());
             //不需要插入捐款记录到数据库
             //userMapper.contributionUpdateGiftTbl(gift);
             Map<String, Object> ret = new HashMap<>();
+            if(!res){
+                throw new BaseException(400, "区块链服务出错！");
+            }
             ret.put("money", gift.getGiftMoney());
             return ret;
         } else {

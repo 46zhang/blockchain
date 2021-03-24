@@ -342,7 +342,7 @@ public class Peer {
     }
 
     //TODO 注意要看看是否存在未确认的utxo
-    public long getBalance(String address, String projectId) {
+    public long getBalance(String address, String projectId,String userId) {
         long money = 0;
         for (UTXO utxo : UTXOHashMap.values()) {
             //必须找到地址一致且金额足够的utxo
@@ -352,6 +352,11 @@ public class Peer {
 
             //不是同一个项目的utxo不能使用，不累加金钱
             if (!utxo.getFormProjectId().equals(projectId)) {
+                continue;
+            }
+
+            //不是同一个项目的utxo不能使用，不累加金钱
+            if (!utxo.getFromUserId().equals(userId)) {
                 continue;
             }
 
