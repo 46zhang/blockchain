@@ -60,6 +60,17 @@ public class UserController {
         return JsonResult.success(userService.readProjectDetail(projectId)).result();
     }
 
+    @GetMapping("/getNodeList")
+    public Map getNodeList() {
+        return JsonResult.success(userService.readNodeList()).result();
+    }
+
+
+    @GetMapping("/getUserList")
+    public Map getUserList() {
+        return JsonResult.success(userService.readUserList()).result();
+    }
+
     @GetMapping("/contribution")
     public Map contribution(@RequestHeader("AUTHORIZATION")String token, @RequestParam("projectId") String projectId, @RequestParam("money") int money) throws BaseException {
         return JsonResult.success(userService.contribution(token.substring(7), projectId, money)).result();

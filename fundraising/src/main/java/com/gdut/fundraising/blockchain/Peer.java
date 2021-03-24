@@ -158,8 +158,8 @@ public class Peer {
      */
     private void writeUTXOValues(String port) {
         String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_UTXO_PATH);
-        //创建文件夹
-        FileUtils.createDir(pathName);
+        //创建文件
+        FileUtils.createFile(pathName);
         Collection<UTXO> collection = UTXOHashMap.values();
         List<UTXO> utxos = new ArrayList<UTXO>(collection);
         String data = JSON.toJSONString(utxos);
@@ -173,8 +173,8 @@ public class Peer {
      */
     private void writeTransactionValues(String port) {
         String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_TRANSACTION_PATH);
-        //创建文件夹
-        FileUtils.createDir(pathName);
+        //创建文件
+        FileUtils.createFile(pathName);
         Collection<Transaction> collection = transactionPool.values();
         List<Transaction> utxos = new ArrayList<Transaction>(collection);
         String data = JSON.toJSONString(utxos);
@@ -190,6 +190,12 @@ public class Peer {
         String pathName1 = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_PK_PATH);
         String pathName2 = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_SK_PATH);
         String pathName3 = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_ADDR_PATH);
+
+        //创建文件,会保证幂等
+        FileUtils.createFile(pathName1);
+        FileUtils.createFile(pathName2);
+        FileUtils.createFile(pathName3);
+
         byte[] pk = wallet.getKeyPair().getPublic().getEncoded();
         byte[] sk = wallet.getKeyPair().getPrivate().getEncoded();
         String address = wallet.getAddress();
@@ -252,6 +258,11 @@ public class Peer {
             wallet = JSON.parseObject(data, Wallet.class);
         }
 
+    }
+
+    public String getAddressFromFile(String port) {
+        String pathName3 = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_ADDR_PATH);
+        return FileUtils.read(pathName3);
     }
 
     private void loadKeyPair(String port) {

@@ -1,10 +1,14 @@
 package com.gdut.fundraising.service.impl;
 
 import com.gdut.fundraising.blockchain.*;
+import com.gdut.fundraising.constant.NodeNameEnum;
 import com.gdut.fundraising.constant.raft.NodeStatus;
+import com.gdut.fundraising.dto.NodeQueryResult;
 import com.gdut.fundraising.entities.FundFlowEntity;
 import com.gdut.fundraising.entities.SpendEntity;
 import com.gdut.fundraising.entities.raft.BlockChainNode;
+import com.gdut.fundraising.entities.raft.NodeInfo;
+import com.gdut.fundraising.entities.raft.NodeInfoSet;
 import com.gdut.fundraising.exception.BaseException;
 import com.gdut.fundraising.service.BCTService;
 import org.slf4j.Logger;
@@ -15,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Properties;
 
 @Service
 public class BCTServiceImpl implements BCTService {
@@ -251,6 +256,27 @@ public class BCTServiceImpl implements BCTService {
             }
         }
         return fundFlowEntities;
+    }
+
+    @Override
+    public List<NodeQueryResult> getNodeQueryList() {
+        List<NodeQueryResult> list = new ArrayList<>();
+        Properties props = System.getProperties(); //系统属性
+        String ipList = (String) props.get("ipList");
+        String[] strings = ipList.split(",");
+        //设置每个节点的名称以及对应的地址(对前端管理员而言相当于是id)
+        for (String s : strings) {
+            NodeInfo nodeInfo = new NodeInfo();
+            nodeInfo.setId(s);
+            String[] s1 = s.split(":");
+            NodeQueryResult nodeQueryResult = new NodeQueryResult();
+            nodeQueryResult.setId(blockChainNode.getPeer().getAddressFromFile(s1[1]));
+            NodeNameEnum nodeNameEnum = NodeNameEnum.getNodeNameEnumByPort(s1[1]);
+            nodeQueryResult.setName(nodeNameEnum.getName());
+            list.add(nodeQueryResult);
+        }
+
+        return list;
     }
 
     /**

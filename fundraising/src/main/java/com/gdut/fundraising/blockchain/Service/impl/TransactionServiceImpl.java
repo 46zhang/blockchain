@@ -66,6 +66,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction transaction = new Transaction();
         Wallet ownWallet = peer.getWallet();
+
         //要减去手续费
         Vout other = buildVout(toAddress, money - BlockChainConstant.FEE, userId, projectId);
 

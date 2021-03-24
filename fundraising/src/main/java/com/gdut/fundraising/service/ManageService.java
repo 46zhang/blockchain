@@ -1,12 +1,13 @@
 package com.gdut.fundraising.service;
 
+import com.gdut.fundraising.dto.NodeQueryResult;
 import com.gdut.fundraising.entities.OrderTblEntity;
 import com.gdut.fundraising.entities.ProjectTblEntity;
 import com.gdut.fundraising.entities.SpendEntity;
 import com.gdut.fundraising.exception.BaseException;
 
 
-
+import java.util.List;
 import java.util.Map;
 
 
@@ -21,6 +22,7 @@ public interface ManageService {
 
     OrderTblEntity expenditure(String token, OrderTblEntity orderTblEntity);
 
+    List<NodeQueryResult> readNodeList(String token);
 
     SpendEntity spend(String token, SpendEntity spendEntity);
 }

@@ -30,6 +30,9 @@ public interface UserMapper {
     @Select("select * from user_tbl where user_token=#{token}")
     UserTblEntity selectUserByToken(String token);
 
+    @Select("select * from user_tbl")
+    List<UserTblEntity> selectAllUser();
+
     @Insert("insert into project_tbl set user_id=#{userId}, project_id=#{projectId}, project_start_time=#{projectStartTime}, project_finish_time=#{projectFinishTime}, project_state=2, project_name=#{projectName}, project_people_nums=0, project_money_target=-1, project_money_now=0, project_photo=#{projectPhoto}, project_explain=#{projectExplain}")
     void launch(ProjectTblEntity projectTblEntity);
 

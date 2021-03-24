@@ -1,6 +1,7 @@
 package com.gdut.fundraising.service;
 
 import com.gdut.fundraising.dto.LoginResult;
+import com.gdut.fundraising.dto.NodeQueryResult;
 import com.gdut.fundraising.dto.ReadDonationResult;
 import com.gdut.fundraising.dto.ReadExpenditureResult;
 import com.gdut.fundraising.entities.ProjectTblEntity;
@@ -26,6 +27,10 @@ public interface UserService {
     Map readProjectList(int pageIndex , int pageSize);
 
     ProjectTblEntity readProjectDetail(String projectId);
+
+    List<NodeQueryResult> readNodeList();
+
+    List<UserTblEntity> readUserList();
 
     @Transactional
     Map contribution(String token, String projectId, int money) throws BaseException;

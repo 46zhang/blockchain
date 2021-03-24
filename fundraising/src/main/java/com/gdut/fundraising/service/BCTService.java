@@ -2,6 +2,7 @@ package com.gdut.fundraising.service;
 
 import com.gdut.fundraising.blockchain.Block;
 import com.gdut.fundraising.blockchain.Transaction;
+import com.gdut.fundraising.dto.NodeQueryResult;
 import com.gdut.fundraising.entities.FundFlowEntity;
 import com.gdut.fundraising.entities.SpendEntity;
 
@@ -66,4 +67,10 @@ public interface BCTService {
      * @return
      */
     List<FundFlowEntity> getProjectFundFlow(String projectId);
+
+    /**
+     * 获取所有节点的信息
+     * @return
+     */
+    List<NodeQueryResult> getNodeQueryList();
 }
