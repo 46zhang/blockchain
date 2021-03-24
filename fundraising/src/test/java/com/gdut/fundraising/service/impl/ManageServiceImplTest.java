@@ -4,22 +4,16 @@ import com.gdut.fundraising.entities.SpendEntity;
 import com.gdut.fundraising.entities.UserTblEntity;
 import com.gdut.fundraising.exception.BaseException;
 import com.gdut.fundraising.mapper.ManageMapper;
-import com.gdut.fundraising.service.BlockChainService;
+import com.gdut.fundraising.service.BCTService;
 import com.gdut.fundraising.service.ProjectMachineService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.annotation.Resource;
-
-import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.*;
 
 public class ManageServiceImplTest {
 
@@ -27,7 +21,7 @@ public class ManageServiceImplTest {
     ManageServiceImpl manageService;
 
     @Mock
-    BlockChainService blockChainService;
+    BCTService BCTService;
 
     @Mock
     ManageMapper manageMapper;
@@ -59,7 +53,7 @@ public class ManageServiceImplTest {
         userTblEntity.setUserToken(token);
         userTblEntity.setUserPhone("342342434");
         when(manageMapper.selectUserByToken(token)).thenReturn(userTblEntity);
-        when(blockChainService.useMoney(spendEntity)).thenReturn(true);
+        when(BCTService.useMoney(spendEntity)).thenReturn(true);
 
         SpendEntity res = manageService.spend(token, spendEntity);
         Assert.assertEquals(res.getFormUserId(),spendEntity.getFormUserId());
@@ -87,7 +81,7 @@ public class ManageServiceImplTest {
         userTblEntity.setUserToken(token);
         userTblEntity.setUserPhone("342342434");
         when(manageMapper.selectUserByToken(token)).thenReturn(userTblEntity);
-        when(blockChainService.useMoney(spendEntity)).thenReturn(true);
+        when(BCTService.useMoney(spendEntity)).thenReturn(true);
         try {
             manageService.spend(token, spendEntity);
             Assert.fail("No exception");
@@ -116,7 +110,7 @@ public class ManageServiceImplTest {
         userTblEntity.setUserToken(token);
         userTblEntity.setUserPhone("342342434");
         when(manageMapper.selectUserByToken(token)).thenReturn(userTblEntity);
-        when(blockChainService.useMoney(spendEntity)).thenReturn(false);
+        when(BCTService.useMoney(spendEntity)).thenReturn(false);
         try {
             manageService.spend(token, spendEntity);
             Assert.fail("No exception");

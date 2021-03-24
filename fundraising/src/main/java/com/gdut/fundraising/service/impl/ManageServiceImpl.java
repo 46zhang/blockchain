@@ -8,7 +8,7 @@ import com.gdut.fundraising.entities.SpendEntity;
 import com.gdut.fundraising.entities.UserTblEntity;
 import com.gdut.fundraising.exception.BaseException;
 import com.gdut.fundraising.mapper.ManageMapper;
-import com.gdut.fundraising.service.BlockChainService;
+import com.gdut.fundraising.service.BCTService;
 import com.gdut.fundraising.service.ManageService;
 import com.gdut.fundraising.service.ProjectMachineService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +23,7 @@ import java.util.*;
 public class ManageServiceImpl implements ManageService {
 
     @Autowired
-    BlockChainService blockChainService;
+    BCTService BCTService;
 
     @Resource
     ManageMapper manageMapper;
@@ -150,7 +150,7 @@ public class ManageServiceImpl implements ManageService {
                 throw new BaseException(400, "支出的金钱不可小于等于零!");
             }
 
-            boolean res= blockChainService.useMoney(spendEntity);
+            boolean res= BCTService.useMoney(spendEntity);
             if(!res){
                 throw  new BaseException(400,"区块链服务存在异常!");
             }

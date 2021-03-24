@@ -3,16 +3,13 @@ package com.gdut.fundraising.service.impl;
 import com.gdut.fundraising.entities.UserTblEntity;
 import com.gdut.fundraising.exception.BaseException;
 import com.gdut.fundraising.mapper.UserMapper;
-import com.gdut.fundraising.service.BlockChainService;
+import com.gdut.fundraising.service.BCTService;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import javax.annotation.Resource;
 
 import java.util.Map;
 
@@ -30,7 +27,7 @@ public class UserServiceImplTest {
 
 
     @Mock
-    BlockChainService blockChainService;
+    BCTService BCTService;
 
 
     @BeforeMethod
@@ -52,7 +49,7 @@ public class UserServiceImplTest {
         userTblEntity.setUserPhone("342342434");
         when(userMapper.contributionUpdateProject(anyDouble(), anyString())).thenReturn(1);
         when(userMapper.selectUserByToken(anyString())).thenReturn(userTblEntity);
-        when(blockChainService.contribution(userTblEntity.getUserId(), projectId, money)).thenReturn(true);
+        when(BCTService.contribution(userTblEntity.getUserId(), projectId, money)).thenReturn(true);
         Map res = userService.contribution(token, projectId, money);
         Assert.assertTrue(res.containsKey("money"));
         assertEquals((long) (Long) res.get("money"), 100L);
@@ -72,7 +69,7 @@ public class UserServiceImplTest {
         userTblEntity.setUserPhone("342342434");
         when(userMapper.contributionUpdateProject(anyDouble(), anyString())).thenReturn(2);
         when(userMapper.selectUserByToken(anyString())).thenReturn(userTblEntity);
-        when(blockChainService.contribution(userTblEntity.getUserId(), projectId, money)).thenReturn(true);
+        when(BCTService.contribution(userTblEntity.getUserId(), projectId, money)).thenReturn(true);
         try {
             userService.contribution(token, projectId, money);
         }catch (BaseException e){

@@ -100,12 +100,12 @@ public class Peer {
         orphanPool = new HashMap<>();
         transactionPool = new HashMap<>();
         blockChain = new ArrayList<>();
-        transactionPoolBackup=new HashMap<>();
+        transactionPoolBackup = new HashMap<>();
         wallet = new Wallet();
     }
 
     @PostConstruct
-    public void loadPeerInitData(){
+    public void loadPeerInitData() {
         Properties props = System.getProperties(); //系统属性
         String port = (String) props.get("port");
         //加载peer的属性
@@ -121,9 +121,11 @@ public class Peer {
      * <3>transactionPol values</3>
      */
     public void writeData() {
+        LOGGER.info("================开始写入数据到文件=====================");
         Properties props = System.getProperties(); //系统属性
         String port = (String) props.get("port");
         writeData(port);
+        LOGGER.info("================写入数据到文件完成=====================");
     }
 
 
@@ -156,6 +158,8 @@ public class Peer {
      */
     private void writeUTXOValues(String port) {
         String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_UTXO_PATH);
+        //创建文件夹
+        FileUtils.createDir(pathName);
         Collection<UTXO> collection = UTXOHashMap.values();
         List<UTXO> utxos = new ArrayList<UTXO>(collection);
         String data = JSON.toJSONString(utxos);
@@ -169,6 +173,8 @@ public class Peer {
      */
     private void writeTransactionValues(String port) {
         String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_TRANSACTION_PATH);
+        //创建文件夹
+        FileUtils.createDir(pathName);
         Collection<Transaction> collection = transactionPool.values();
         List<Transaction> utxos = new ArrayList<Transaction>(collection);
         String data = JSON.toJSONString(utxos);
@@ -291,8 +297,8 @@ public class Peer {
         String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_UTXO_PATH);
         String data = FileUtils.read(pathName);
         if (data == null) {
-            LOGGER.error("peer utxo数据读取失败");
-            throw new BaseException(400, "区块链节点本地数据初始化失败!!!");
+            LOGGER.warn("peer utxo数据读取数据为空");
+            // throw new BaseException(400, "区块链节点本地数据初始化失败!!!");
         } else {
 //            JSONArray jsonArray= JSONArray.parseArray(data);
 //            for(Iterator iterator=jsonArray.iterator();iterator.hasNext();){
@@ -311,8 +317,8 @@ public class Peer {
         String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_TRANSACTION_PATH);
         String data = FileUtils.read(pathName);
         if (data == null) {
-            LOGGER.error("peer transaction数据读取失败");
-            throw new BaseException(400, "区块链节点本地数据初始化失败!!!");
+            LOGGER.error("peer transaction数据读取数据为空");
+            //throw new BaseException(400, "区块链节点本地数据初始化失败!!!");
         } else {
             List<Transaction> list = JSON.parseArray(data, Transaction.class);
             //初始化 transactionPool

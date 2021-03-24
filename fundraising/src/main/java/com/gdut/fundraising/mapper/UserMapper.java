@@ -30,7 +30,7 @@ public interface UserMapper {
     @Select("select * from user_tbl where user_token=#{token}")
     UserTblEntity selectUserByToken(String token);
 
-    @Insert("insert into project_tbl set user_id=#{userId}, project_id=#{projectId}, project_start_time=#{projectStartTime}, project_finish_time=#{projectFinishTime}, project_state=0, project_name=#{projectName}, project_people_nums=0, project_money_target=-1, project_money_now=0, project_photo=#{projectPhoto}, project_explain=#{projectExplain}")
+    @Insert("insert into project_tbl set user_id=#{userId}, project_id=#{projectId}, project_start_time=#{projectStartTime}, project_finish_time=#{projectFinishTime}, project_state=2, project_name=#{projectName}, project_people_nums=0, project_money_target=-1, project_money_now=0, project_photo=#{projectPhoto}, project_explain=#{projectExplain}")
     void launch(ProjectTblEntity projectTblEntity);
 
     @Update("update project_tbl set project_photo=#{add} where project_id=#{projectId} and user_id=#{userId}")
@@ -39,7 +39,7 @@ public interface UserMapper {
     @Select("select count(project_id) from project_tbl where project_state>=2 and project_state<6")
     int projectCount();
 
-    @Select("select project_id, project_photo, project_people_nums, project_money_now, project_name from project_tbl where project_state>=2 and project_state<6 limit ${pageIndex * pageSize}, #{pageSize}")
+    @Select("select project_id, project_photo, project_people_nums, project_money_now, project_name from project_tbl where project_state>=2 and project_state<6 order by project_start_time desc limit ${pageIndex * pageSize}, #{pageSize}")
     List<ReadListResult> readProjectList(int pageIndex, int pageSize);
 
     @Select("select * from project_tbl where project_id=#{projectId} and project_state>=2 and project_state<6")

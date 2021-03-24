@@ -66,10 +66,11 @@ public class Transaction {
 
     /**
      * 获取输出金额，不包括找零
+     *
      * @return
      */
-    public Long getOutputMoneyNoIncludeChange(){
-        return outList.get(0).getMoney();
+    public Long getOutputMoneyNoIncludeChange() {
+        return outList.size() == 0 ? 0 : outList.get(0).getMoney();
     }
 
     public List<Vout> getOutList() {

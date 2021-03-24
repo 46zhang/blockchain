@@ -154,16 +154,22 @@ public class BlockChainServiceImplTest {
         txs.add(tx2);
         Block block2 = MockDataUtil.buildBlock(1, block.getHash(), txs);
         //打包第三个区块(包含 tx1 tx2)到区块链中
-        result = blockChainService.addBlockToChain(peer, block2);
-        Assert.assertTrue(result);
-        Assert.assertTrue(peer.getBlockChain().size() == 2);
-        Assert.assertTrue(peer.getBlockChain().get(0).getHash().equals(block.getHash()));
-        Assert.assertTrue(peer.getBlockChain().get(1).getHash().equals(block2.getHash()));
-        Assert.assertTrue(peer.getBlockChain().get(1).getTxs().size() == 2);
-        Assert.assertTrue(peer.getUTXOHashMapBackup().containsKey(new Pointer(tx.getId(), 0)));
-        Assert.assertTrue(peer.getTransactionPool().isEmpty());
-        Assert.assertTrue(peer.getTransactionPoolBackup().containsKey(tx1.getId()));
-        Assert.assertTrue(peer.getTransactionPoolBackup().containsKey(tx2.getId()));
+        try{
+         blockChainService.addBlockToChain(peer, block2);
+         Assert.fail("No exception");
+        }catch (BaseException ex){
+            Assert.assertEquals(ex.getMessage(),"区块位置计算出错");
+        }
+
+//        Assert.assertTrue(result);
+//        Assert.assertTrue(peer.getBlockChain().size() == 2);
+//        Assert.assertTrue(peer.getBlockChain().get(0).getHash().equals(block.getHash()));
+//        Assert.assertTrue(peer.getBlockChain().get(1).getHash().equals(block2.getHash()));
+//        Assert.assertTrue(peer.getBlockChain().get(1).getTxs().size() == 2);
+//        Assert.assertTrue(peer.getUTXOHashMapBackup().containsKey(new Pointer(tx.getId(), 0)));
+//        Assert.assertTrue(peer.getTransactionPool().isEmpty());
+//        Assert.assertTrue(peer.getTransactionPoolBackup().containsKey(tx1.getId()));
+//        Assert.assertTrue(peer.getTransactionPoolBackup().containsKey(tx2.getId()));
     }
 
     @Test
@@ -216,15 +222,21 @@ public class BlockChainServiceImplTest {
         Block block2 = MockDataUtil.buildBlock(1, block.getHash(), txs);
         //打包第三个区块(只含 tx1 tx2)到区块链中
         //会爆错，整个区块链会混乱，因为上一个交易tx1丢失了
-        result = blockChainService.addBlockToChain(peer, block2);
-        Assert.assertTrue(result);
-        Assert.assertTrue(peer.getBlockChain().size() == 2);
-        Assert.assertTrue(peer.getBlockChain().get(0).getHash().equals(block.getHash()));
-        Assert.assertTrue(peer.getBlockChain().get(1).getHash().equals(block2.getHash()));
-        Assert.assertTrue(peer.getBlockChain().get(1).getTxs().size() == 1);
-        Assert.assertTrue(!peer.getTransactionPool().isEmpty());
-        Assert.assertTrue(peer.getTransactionPool().containsKey(tx1.getId()));
-        Assert.assertTrue(peer.getTransactionPoolBackup().containsKey(tx2.getId()));
+        try{
+            blockChainService.addBlockToChain(peer, block2);
+            Assert.fail("No exception");
+        }catch (BaseException ex){
+            Assert.assertEquals(ex.getMessage(),"区块位置计算出错");
+        }
+//        result = blockChainService.addBlockToChain(peer, block2);
+//        Assert.assertTrue(result);
+//        Assert.assertTrue(peer.getBlockChain().size() == 2);
+//        Assert.assertTrue(peer.getBlockChain().get(0).getHash().equals(block.getHash()));
+//        Assert.assertTrue(peer.getBlockChain().get(1).getHash().equals(block2.getHash()));
+//        Assert.assertTrue(peer.getBlockChain().get(1).getTxs().size() == 1);
+//        Assert.assertTrue(!peer.getTransactionPool().isEmpty());
+//        Assert.assertTrue(peer.getTransactionPool().containsKey(tx1.getId()));
+//        Assert.assertTrue(peer.getTransactionPoolBackup().containsKey(tx2.getId()));
 
     }
 
