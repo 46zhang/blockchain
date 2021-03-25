@@ -58,4 +58,23 @@ public class ManagerController {
         return JsonResult.success(manageService.spend(token.substring(7), spendEntity)).result();
     }
 
+
+
+    @GetMapping("/getAllBlock")
+    public Map readAllBlock(@RequestHeader("AUTHORIZATION") String token) {
+        return JsonResult.success(manageService.readAllBlock(token.substring(7))).result();
+    }
+
+    @GetMapping("/getUserContribution")
+    public Map readAllUserContribution(@RequestHeader("AUTHORIZATION") String token,@RequestParam("userId") String userId) {
+        return JsonResult.success(manageService.readUserContribution(token.substring(7),userId)).result();
+    }
+
+
+    @GetMapping("/getProjectFundFlow")
+    public Map readOneProjectAllFund(@RequestHeader("AUTHORIZATION") String token,@RequestParam("projectId") String projectId) {
+        return JsonResult.success(manageService.readProjectAllFund(token.substring(7),projectId)).result();
+    }
+
+
 }

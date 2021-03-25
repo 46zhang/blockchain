@@ -45,9 +45,4 @@ public class SpendEntity {
      */
     private String orderExplain;
 
-
-
-    public String getOrderTime(){
-        return orderTime.substring(0, 19);
-    }
 }

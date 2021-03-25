@@ -30,6 +30,9 @@ public interface UserMapper {
     @Select("select * from user_tbl where user_token=#{token}")
     UserTblEntity selectUserByToken(String token);
 
+    @Select("select * from user_tbl where user_id=#{id}")
+    UserTblEntity selectUserById(String id);
+
     @Select("select * from user_tbl")
     List<UserTblEntity> selectAllUser();
 

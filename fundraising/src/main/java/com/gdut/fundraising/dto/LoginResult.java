@@ -9,6 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class LoginResult {
     /**
+     * 用户id
+     */
+    private String userId;
+    /**
      * 判断是否为管理员
      * 0-用户
      * 1-管理员

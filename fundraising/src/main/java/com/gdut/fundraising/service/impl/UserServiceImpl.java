@@ -1,6 +1,7 @@
 package com.gdut.fundraising.service.impl;
 
 import com.gdut.fundraising.dto.*;
+import com.gdut.fundraising.entities.FundFlowEntity;
 import com.gdut.fundraising.entities.GiftTblEntity;
 import com.gdut.fundraising.entities.ProjectTblEntity;
 import com.gdut.fundraising.entities.UserTblEntity;
@@ -196,11 +197,11 @@ public class UserServiceImpl implements UserService {
             if (userMapper.contributionUpdateProject(gift.getGiftMoney(), gift.getProjectId()) != 1) {
                 throw new BaseException(400, "项目未找到或项目不在募捐状态！");
             }
-            boolean res= BCTService.contribution(gift.getUserId(), gift.getProjectId(), gift.getGiftMoney());
+            boolean res = BCTService.contribution(gift.getUserId(), gift.getProjectId(), gift.getGiftMoney());
             //不需要插入捐款记录到数据库
             //userMapper.contributionUpdateGiftTbl(gift);
             Map<String, Object> ret = new HashMap<>();
-            if(!res){
+            if (!res) {
                 throw new BaseException(400, "区块链服务出错！");
             }
             ret.put("money", gift.getGiftMoney());
@@ -217,5 +218,28 @@ public class UserServiceImpl implements UserService {
 
     public List<ReadExpenditureResult> readExpenditureResult(String projectId) {
         return userMapper.readExpenditureResult(projectId);
+    }
+
+    @Override
+    public List<FundFlowEntity> getUserContribution(String token, String userId) {
+        UserTblEntity userTblEntity = userMapper.selectUserByToken(token);
+        //判断账户是否存在
+        if (userTblEntity != null) {
+            return BCTService.getUserAllContributionFlow(userId);
+        } else {
+            throw new BaseException(400, "token认证失败！");
+        }
+
+    }
+
+    @Override
+    public List<FundFlowEntity> getUserOneProjectFund(String token, String projectId, String userId) {
+        UserTblEntity userTblEntity = userMapper.selectUserByToken(token);
+        //判断账户是否存在
+        if (userTblEntity != null) {
+            return BCTService.getUserProjectAllFundFlow(userId, projectId);
+        } else {
+            throw new BaseException(400, "token认证失败！");
+        }
     }
 }

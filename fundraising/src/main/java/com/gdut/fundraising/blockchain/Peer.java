@@ -151,19 +151,40 @@ public class Peer {
         writeUTXOValues(port);
     }
 
+
+    public boolean saveUTXOSet() {
+        Properties props = System.getProperties(); //系统属性
+        String port = (String) props.get("port");
+        boolean res = writeUTXOValues(port);
+        if (!res) {
+            LOGGER.error("写入UTXO到文件失败 {}", port);
+        }
+        return res;
+    }
+
+    public boolean saveTransactionSet() {
+        Properties props = System.getProperties(); //系统属性
+        String port = (String) props.get("port");
+        boolean res = writeTransactionValues(port);
+        if (!res) {
+            LOGGER.error("写入Transaction到文件失败 {}", port);
+        }
+        return res;
+    }
+
     /**
      * 写入utxo
      *
      * @param port
      */
-    private void writeUTXOValues(String port) {
+    private boolean writeUTXOValues(String port) {
         String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_UTXO_PATH);
         //创建文件
         FileUtils.createFile(pathName);
         Collection<UTXO> collection = UTXOHashMap.values();
         List<UTXO> utxos = new ArrayList<UTXO>(collection);
         String data = JSON.toJSONString(utxos);
-        FileUtils.write(pathName, data);
+        return FileUtils.write(pathName, data);
     }
 
     /**
@@ -171,14 +192,14 @@ public class Peer {
      *
      * @param port
      */
-    private void writeTransactionValues(String port) {
+    private boolean writeTransactionValues(String port) {
         String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_TRANSACTION_PATH);
         //创建文件
         FileUtils.createFile(pathName);
         Collection<Transaction> collection = transactionPool.values();
         List<Transaction> utxos = new ArrayList<Transaction>(collection);
         String data = JSON.toJSONString(utxos);
-        FileUtils.write(pathName, data);
+        return FileUtils.write(pathName, data);
     }
 
     /**
@@ -342,7 +363,7 @@ public class Peer {
     }
 
     //TODO 注意要看看是否存在未确认的utxo
-    public long getBalance(String address, String projectId,String userId) {
+    public long getBalance(String address, String projectId, String userId) {
         long money = 0;
         for (UTXO utxo : UTXOHashMap.values()) {
             //必须找到地址一致且金额足够的utxo

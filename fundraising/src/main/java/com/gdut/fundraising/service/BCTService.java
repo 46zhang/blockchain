@@ -73,4 +73,10 @@ public interface BCTService {
      * @return
      */
     List<NodeQueryResult> getNodeQueryList();
+
+    /**
+     * 获取所有区块的交易资金流动情况
+     * @return
+     */
+    List<FundFlowEntity> getAllBlockFundFlow();
 }

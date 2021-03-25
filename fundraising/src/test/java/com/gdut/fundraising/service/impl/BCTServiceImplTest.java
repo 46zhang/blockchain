@@ -259,7 +259,7 @@ public class BCTServiceImplTest {
 
         List<Vin> vins = new ArrayList<>();
         Vin vin = new Vin();
-        vin.setPublicKey(wallet.getKeyPair().getPublic());
+        vin.setPublicKey(wallet.getKeyPair().getPublic().getEncoded());
         vins.add(vin);
 
         transaction.setLockTime(lockTime);

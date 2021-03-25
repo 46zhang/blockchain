@@ -232,6 +232,9 @@ public class BlockChainNode extends DefaultNode {
      * @return
      */
     public boolean broadcastTransaction(List<Transaction> txs) {
+        if(null== nodeInfoSet.getLeader()){
+            return false;
+        }
         String url = "http://" + nodeInfoSet.getLeader().getId() + "/fundraising/node/broadcast";
         try {
             JsonResult res = networkService.post(url, txs);

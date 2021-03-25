@@ -37,7 +37,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public synchronized Transaction createTransaction(Peer peer, String toAddress, long money,
                                                       String projectId, String userId) {
-        long balance = peer.getBalance(peer.getWallet().getAddress(), userId, projectId);
+        long balance = peer.getBalance(peer.getWallet().getAddress(), projectId, userId);
         //余额不足
         if (balance < money) {
             LOGGER.error("utxo: {},money:{},toAddress:{},projectId:{},userId:{}",
@@ -100,7 +100,7 @@ public class TransactionServiceImpl implements TransactionService {
             try {
                 //产生数字签名
                 byte[] signature = EccUtil.signData(ALGORITHM_NAME, data, privateKey);
-                Vin vin = buildVin(signature, publicKey, utxo.getPointer(), userId, projectId);
+                Vin vin = buildVin(signature, publicKey, utxo.getPointer(), userId, projectId, address);
                 //加入到交易的输入单元
                 transaction.getInList().add(vin);
             } catch (Exception e) {
@@ -178,7 +178,7 @@ public class TransactionServiceImpl implements TransactionService {
      */
     private boolean verifyAddressAndSignature(Vin vin, UTXO utxo, List<Vout> voutList) {
         //根据输入单元的公钥生成地址
-        String address = EccUtil.generateAddress(vin.getPublicKey().getEncoded());
+        String address = EccUtil.generateAddress(vin.getPublicKey());
         //如果地址不匹配，则校验失败
         if (!address.equals(utxo.getVout().getToAddress())) {
             return false;
@@ -188,7 +188,7 @@ public class TransactionServiceImpl implements TransactionService {
             String s = utxo.getPointer().getTxId() + utxo.getPointer().getN() + voutList;
             //校验数字签名
             result = EccUtil.verifySign(ALGORITHM_NAME, EccUtil.buildMessage(s),
-                    vin.getPublicKey(), vin.getSignature());
+                    vin.getPublicKeyObject(), vin.getSignature());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -255,7 +255,8 @@ public class TransactionServiceImpl implements TransactionService {
         //设置地址
         Vout vout = buildVout(peer.getWallet().getAddress(), money, userId, projectId);
 
-        Vin vin = buildVin(generateRandomStr(32).getBytes(), null, null, userId, projectId);
+        Vin vin = buildVin(generateRandomStr(32).getBytes(),
+                null, null, userId, projectId, null);
 
         voutList.add(vout);
         vinList.add(vin);
@@ -460,12 +461,14 @@ public class TransactionServiceImpl implements TransactionService {
      * @param projectId
      * @return
      */
-    private Vin buildVin(byte[] signature, PublicKey publicKey, Pointer pointer, String userId, String projectId) {
+    private Vin buildVin(byte[] signature, PublicKey publicKey, Pointer pointer,
+                         String userId, String projectId, String address) {
         Vin vin = new Vin();
         vin.setSignature(signature);
         vin.setFromUserId(userId);
         vin.setFormProjectId(projectId);
-        vin.setPublicKey(publicKey);
+        vin.setPublicKey(null);
+        vin.setAddress(address);
         vin.setToSpent(pointer);
         return vin;
     }

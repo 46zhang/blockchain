@@ -8,18 +8,17 @@ import com.gdut.fundraising.entities.FundFlowEntity;
 import com.gdut.fundraising.entities.SpendEntity;
 import com.gdut.fundraising.entities.raft.BlockChainNode;
 import com.gdut.fundraising.entities.raft.NodeInfo;
-import com.gdut.fundraising.entities.raft.NodeInfoSet;
 import com.gdut.fundraising.exception.BaseException;
+import com.gdut.fundraising.mapper.UserMapper;
 import com.gdut.fundraising.service.BCTService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Properties;
+import javax.annotation.Resource;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Service
 public class BCTServiceImpl implements BCTService {
@@ -27,6 +26,11 @@ public class BCTServiceImpl implements BCTService {
 
     @Autowired
     private BlockChainNode blockChainNode;
+
+    @Resource
+    UserMapper userMapper;
+
+    public static HashMap<String, String> kvTable = new HashMap<>();
 
     /**
      * 募捐
@@ -76,8 +80,12 @@ public class BCTServiceImpl implements BCTService {
 
         //添加区块到区块链中,该方法是线程安全的
         boolean res = peer.getBlockChainService().addBlockToChain(peer, block);
-
+        //保存utxo set
+        res = res && peer.saveUTXOSet();
+        //保存transaction set
+        res = res && peer.saveTransactionSet();
         if (!res) {
+            rollBack(peer, block);
             return false;
         }
 
@@ -86,11 +94,18 @@ public class BCTServiceImpl implements BCTService {
 
         //如果共识成功，则插入给该区块,否则回滚该区块,该区块必须是位于最后一个
         if (!res) {
-            //该方法是线程安全的
-            peer.getBlockChainService().rollBackBlock(peer, block);
+            rollBack(peer, block);
         }
 
         return res;
+    }
+
+    private void rollBack(Peer peer, Block block) {
+        //该方法是线程安全的
+        peer.getBlockChainService().rollBackBlock(peer, block);
+        //保存对应的内容
+        peer.saveUTXOSet();
+        peer.saveTransactionSet();
     }
 
 
@@ -111,6 +126,9 @@ public class BCTServiceImpl implements BCTService {
             LOGGER.error("transaction create fail!!  spendEntity:{}", spendEntity);
             return false;
         }
+
+        SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        spendEntity.setOrderTime(timeFormat.format(transaction.getLockTime()));
 
         //如果当前节点是leader则直接创建新的区块，如果是其他节点则只需要广播交易过去，由leader节点去创建区块
         Collection<Transaction> collection = peer.getTransactionPool().values();
@@ -214,7 +232,7 @@ public class BCTServiceImpl implements BCTService {
             for (Transaction tx : block.getTxs()) {
                 //获取用户的所有捐款信息，捐款全部都是创币交易
                 if (tx.getFromUserId().equals(userId) && tx.isCoinBase()) {
-                    FundFlowEntity fundFlowEntity = buildFundFlowEntity(tx, block);
+                    FundFlowEntity fundFlowEntity = buildFundFlowEntity(tx, block, i);
                     fundFlowEntities.add(fundFlowEntity);
                 }
             }
@@ -232,7 +250,7 @@ public class BCTServiceImpl implements BCTService {
             //实际上时间复杂度不会很高，因为每个block只有1-2个transaction
             for (Transaction tx : block.getTxs()) {
                 if (tx.getFromUserId().equals(userId) && tx.getFormProjectId().equals(projectId)) {
-                    FundFlowEntity fundFlowEntity = buildFundFlowEntity(tx, block);
+                    FundFlowEntity fundFlowEntity = buildFundFlowEntity(tx, block, i);
                     fundFlowEntities.add(fundFlowEntity);
                 }
             }
@@ -250,7 +268,7 @@ public class BCTServiceImpl implements BCTService {
             //实际上时间复杂度不会很高，因为每个block只有1-2个transaction
             for (Transaction tx : block.getTxs()) {
                 if (tx.getFormProjectId().equals(projectId)) {
-                    FundFlowEntity fundFlowEntity = buildFundFlowEntity(tx, block);
+                    FundFlowEntity fundFlowEntity = buildFundFlowEntity(tx, block, i);
                     fundFlowEntities.add(fundFlowEntity);
                 }
             }
@@ -264,11 +282,16 @@ public class BCTServiceImpl implements BCTService {
         Properties props = System.getProperties(); //系统属性
         String ipList = (String) props.get("ipList");
         String[] strings = ipList.split(",");
+        String port = (String) props.get("port");
         //设置每个节点的名称以及对应的地址(对前端管理员而言相当于是id)
         for (String s : strings) {
             NodeInfo nodeInfo = new NodeInfo();
             nodeInfo.setId(s);
             String[] s1 = s.split(":");
+            //自身的节点不用返回，因为没必要自己把钱给自己
+            if (s1[1].equals(port)) {
+                continue;
+            }
             NodeQueryResult nodeQueryResult = new NodeQueryResult();
             nodeQueryResult.setId(blockChainNode.getPeer().getAddressFromFile(s1[1]));
             NodeNameEnum nodeNameEnum = NodeNameEnum.getNodeNameEnumByPort(s1[1]);
@@ -277,6 +300,55 @@ public class BCTServiceImpl implements BCTService {
         }
 
         return list;
+    }
+
+    @Override
+    public List<FundFlowEntity> getAllBlockFundFlow() {
+        List<FundFlowEntity> fundFlowEntities = new ArrayList<>();
+        List<Block> blockChain = blockChainNode.getPeer().getBlockChain();
+
+        for (int i = blockChain.size() - 1; i >= 0; --i) {
+            Block block = blockChain.get(i);
+            //实际上时间复杂度不会很高，因为每个block只有1-2个transaction
+            for (Transaction tx : block.getTxs()) {
+                FundFlowEntity fundFlowEntity = buildFundFlowEntity(tx, block, i);
+                fundFlowEntities.add(fundFlowEntity);
+            }
+        }
+        return fundFlowEntities;
+    }
+
+    /**
+     * 将地址转化为对应的机构名称
+     *
+     * @param address
+     * @return
+     */
+    private String transferAddressToName(String address) {
+        //使用缓存
+        if (kvTable.containsKey(address)) {
+            return kvTable.get(address);
+        }
+
+        List<NodeQueryResult> list = new ArrayList<>();
+        Properties props = System.getProperties(); //系统属性
+        String ipList = (String) props.get("ipList");
+        String[] strings = ipList.split(",");
+        String port = "";
+        //设置每个节点的名称以及对应的地址(对前端管理员而言相当于是id)
+        for (String s : strings) {
+            NodeInfo nodeInfo = new NodeInfo();
+            nodeInfo.setId(s);
+            String[] s1 = s.split(":");
+            String nodeAddress = blockChainNode.getPeer().getAddressFromFile(s1[1]);
+            if (address.equals(nodeAddress)) {
+                NodeNameEnum nodeNameEnum = NodeNameEnum.getNodeNameEnumByPort(s1[1]);
+                kvTable.put(address, nodeNameEnum.getName());
+                return nodeNameEnum.getName();
+            }
+        }
+
+        return "";
     }
 
     /**
@@ -303,7 +375,7 @@ public class BCTServiceImpl implements BCTService {
      * @param block
      * @return
      */
-    private FundFlowEntity buildFundFlowEntity(Transaction tx, Block block) {
+    private FundFlowEntity buildFundFlowEntity(Transaction tx, Block block, int i) {
 //        long sum = 0;
 //        for (Vout vout : tx.getOutList()) {
 //            sum += vout.getMoney();
@@ -315,21 +387,54 @@ public class BCTServiceImpl implements BCTService {
         FundFlowEntity fundFlowEntity = new FundFlowEntity();
         fundFlowEntity.setBlockHash(block.getHash());
         fundFlowEntity.setMoney(sum);
+
         fundFlowEntity.setProjectId(tx.getFormProjectId());
+        fundFlowEntity.setProjectName(findProjectNameById(tx.getFormProjectId()));
         fundFlowEntity.setUserId(tx.getFromUserId());
+        fundFlowEntity.setUserName(findUserNameById(tx.getFromUserId()));
         fundFlowEntity.setTime(tx.getLockTime());
-        fundFlowEntity.setTo(tx.getOutList().get(0).getToAddress());
+        String toAddress = tx.getOutList().get(0).getToAddress();
+        fundFlowEntity.setTo(transferAddressToName(toAddress));
         fundFlowEntity.setTxId(tx.getId());
+        fundFlowEntity.setBlockIndex(i);
+        fundFlowEntity.setCoinBase(tx.isCoinBase());
 
         //如果是创币交易不需要设置输入地址
         if (!tx.isCoinBase()) {
             //同一个交易的所有vin地址都一样，所以选第一个就好
-            String vinAddress = EccUtil.generateAddress(tx.getInList().get(0).getPublicKey().getEncoded());
-            fundFlowEntity.setFrom(vinAddress);
+            String vinAddress = tx.getInList().get(0).getAddress();
+            if (vinAddress != null) {
+                fundFlowEntity.setFrom(transferAddressToName(vinAddress));
+            }
+        } else {
+            fundFlowEntity.setFrom("用户: " + fundFlowEntity.getUserId());
         }
 
         return fundFlowEntity;
     }
 
+    private String findUserNameById(String userId) {
+        //使用缓存，减少数据库访问次数
+        String res = "";
+        if (kvTable.containsKey(userId)) {
+            return kvTable.get(userId);
+        } else {
+            res = userMapper.selectUserById(userId).getUserName();
+            kvTable.put(userId, res);
+        }
+        return res;
+    }
+
+    private String findProjectNameById(String projectId) {
+        //使用缓存，减少数据库访问次数
+        String res = "";
+        if (kvTable.containsKey(projectId)) {
+            return kvTable.get(projectId);
+        } else {
+            res = userMapper.readProjectDetail(projectId).getProjectName();
+            kvTable.put(projectId, res);
+        }
+        return res;
+    }
 
 }

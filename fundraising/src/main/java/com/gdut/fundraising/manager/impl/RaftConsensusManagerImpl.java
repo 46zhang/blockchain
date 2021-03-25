@@ -170,6 +170,9 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
                 Peer peer = node.getPeer();
                 if (entry.getIndex() > peer.getBlockChain().size()) {
                     res = peer.getBlockChainService().addBlockToChain(peer, entry.getData());
+                    //保存下utxo跟transaction
+                    peer.saveTransactionSet();
+                    peer.saveUTXOSet();
                 }
 
                 if (!res) {

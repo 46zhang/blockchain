@@ -85,4 +85,16 @@ public class UserController {
     public Map readExpenditureResult(@RequestParam("projectId") String projectId){
         return JsonResult.success(userService.readExpenditureResult(projectId)).result();
     }
+
+    @GetMapping("/getUserContribution")
+    public Map getUserContribution(@RequestHeader("AUTHORIZATION")String token,@RequestParam("userId") String userId){
+        return JsonResult.success(userService.getUserContribution(token.substring(7),userId)).result();
+    }
+
+
+    @GetMapping("/getUserOneProjectFund")
+    public Map getUserOneProjectFund(@RequestHeader("AUTHORIZATION")String token,
+                                     @RequestParam("projectId") String projectId,@RequestParam("userId") String userId){
+        return JsonResult.success(userService.getUserOneProjectFund(token.substring(7),projectId,userId)).result();
+    }
 }

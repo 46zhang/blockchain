@@ -6,6 +6,8 @@ import java.util.Date;
  * 资金流实体信息
  */
 public class FundFlowEntity {
+    int blockIndex;
+
     String txId;
 
     String blockHash;
@@ -22,6 +24,43 @@ public class FundFlowEntity {
 
     Long money;
 
+    String userName;
+
+    String projectName;
+
+    boolean coinBase;
+
+    public boolean isCoinBase() {
+        return coinBase;
+    }
+
+    public void setCoinBase(boolean coinBase) {
+        this.coinBase = coinBase;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    public int getBlockIndex() {
+        return blockIndex;
+    }
+
+    public void setBlockIndex(int blockIndex) {
+        this.blockIndex = blockIndex;
+    }
 
     public String getTxId() {
         return txId;
