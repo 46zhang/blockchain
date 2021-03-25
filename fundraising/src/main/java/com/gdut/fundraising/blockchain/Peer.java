@@ -311,11 +311,13 @@ public class Peer {
     private void loadBLockChain(String port) {
         String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.BLOCK_CHAIN_PATH);
         String[] fileNames = FileUtils.getAllFileNameInDir(pathName);
+
         if (fileNames == null || fileNames.length <= 0) {
             return;
         }
-        for (String file : fileNames) {
-            String data = FileUtils.read(FileUtils.buildPath(pathName, file));
+
+        for (int i = 0; i < fileNames.length; ++i) {
+            String data = FileUtils.read(FileUtils.buildPath(pathName, String.valueOf(i+1) + ".json"));
             if (data != null) {
                 LogEntry entry = JSON.parseObject(data, LogEntry.class);
                 //添加区块数据
@@ -324,6 +326,7 @@ public class Peer {
         }
         LOGGER.info("================区块链数组初始化完成=====================");
     }
+
 
     private void loadUTXO(String port) {
         String pathName = FileUtils.buildPath(FileUtils.getRootFilePath(), port, LogConstance.PEER_UTXO_PATH);
