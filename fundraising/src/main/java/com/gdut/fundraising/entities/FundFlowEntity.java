@@ -20,7 +20,7 @@ public class FundFlowEntity {
 
     String To;
 
-    Date time;
+    String time;
 
     Long money;
 
@@ -110,11 +110,11 @@ public class FundFlowEntity {
         To = to;
     }
 
-    public Date getTime() {
+    public String getTime() {
         return time;
     }
 
-    public void setTime(Date time) {
+    public void setTime(String time) {
         this.time = time;
     }
 

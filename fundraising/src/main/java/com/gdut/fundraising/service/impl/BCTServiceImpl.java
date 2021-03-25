@@ -392,7 +392,7 @@ public class BCTServiceImpl implements BCTService {
         fundFlowEntity.setProjectName(findProjectNameById(tx.getFormProjectId()));
         fundFlowEntity.setUserId(tx.getFromUserId());
         fundFlowEntity.setUserName(findUserNameById(tx.getFromUserId()));
-        fundFlowEntity.setTime(tx.getLockTime());
+        fundFlowEntity.setTime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(tx.getLockTime()));
         String toAddress = tx.getOutList().get(0).getToAddress();
         fundFlowEntity.setTo(transferAddressToName(toAddress));
         fundFlowEntity.setTxId(tx.getId());
