@@ -13,6 +13,8 @@ import org.springframework.util.ObjectUtils;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -289,6 +291,9 @@ public class TransactionServiceImpl implements TransactionService {
         List<Pointer> pointers = new ArrayList<>();
         for (Transaction t : txs) {
             for (Vin vin : t.getInList()) {
+                if (null == vin.getToSpent()) {
+                    continue;
+                }
                 pointers.add(vin.getToSpent());
             }
         }
@@ -303,7 +308,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      */
     @Override
-    public HashMap<Pointer, UTXO> removeSpentUTXOFromTxs(HashMap<Pointer, UTXO> utxoHashMap, List<Transaction> txs) {
+    public ConcurrentHashMap<Pointer, UTXO> removeSpentUTXOFromTxs(ConcurrentHashMap<Pointer, UTXO> utxoHashMap, List<Transaction> txs) {
         List<Pointer> pointers = findVinPointerFromTxs(txs);
         return utxoService.deleteUTXOByPointer(utxoHashMap, pointers);
     }
@@ -315,7 +320,7 @@ public class TransactionServiceImpl implements TransactionService {
      * @param txs
      */
     @Override
-    public void addUTXOFromTxsToMap(HashMap<Pointer, UTXO> utxoHashMap, List<Transaction> txs) {
+    public void addUTXOFromTxsToMap(ConcurrentHashMap<Pointer, UTXO> utxoHashMap, List<Transaction> txs) {
         List<UTXO> utxoList = findUTXOFromTxsInBlock(txs);
         utxoService.addUTXOToMap(utxoHashMap, utxoList);
     }
@@ -327,8 +332,8 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      */
     @Override
-    public List<Pointer> findVoutPointerFromTxs(List<Transaction> txs) {
-        List<Pointer> pointerList = new ArrayList<>();
+    public CopyOnWriteArrayList<Pointer> findVoutPointerFromTxs(List<Transaction> txs) {
+        CopyOnWriteArrayList<Pointer> pointerList = new CopyOnWriteArrayList<>();
         for (Transaction t : txs) {
             for (int i = 0; i < t.getOutList().size(); ++i) {
                 pointerList.add(new Pointer(t.getId(), i));
@@ -345,9 +350,9 @@ public class TransactionServiceImpl implements TransactionService {
      * @return
      */
     @Override
-    public HashMap<String, Transaction> removeTransactionFromTransactionPool(HashMap<String, Transaction> pool,
-                                                                             List<Transaction> txs) {
-        HashMap<String, Transaction> deletedTransaction = new HashMap<>();
+    public ConcurrentHashMap<String, Transaction> removeTransactionFromTransactionPool(ConcurrentHashMap<String, Transaction> pool,
+                                                                                       List<Transaction> txs) {
+        ConcurrentHashMap<String, Transaction> deletedTransaction = new ConcurrentHashMap<>();
         for (Transaction t : txs) {
             if (pool.containsKey(t.getId())) {
                 deletedTransaction.put(t.getId(), t);

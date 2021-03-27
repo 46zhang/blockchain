@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 public class BlockChainServiceImpl implements BlockChainService {
@@ -140,7 +142,7 @@ public class BlockChainServiceImpl implements BlockChainService {
      * @param peer
      */
     private void rollBack(Peer peer) {
-        HashMap<Pointer, UTXO> utxoHashMap = peer.getUTXOHashMap();
+        ConcurrentHashMap<Pointer, UTXO> utxoHashMap = peer.getUTXOHashMap();
         //恢复交易池中的交易
         peer.getTransactionPool().putAll(peer.getTransactionPoolBackup());
 
@@ -151,9 +153,9 @@ public class BlockChainServiceImpl implements BlockChainService {
         utxoHashMap.putAll(peer.getUTXOHashMapBackup());
 
         //清空备份缓存
-        peer.setTransactionPoolBackup(new HashMap<>());
-        peer.setUTXOHashMapBackup(new HashMap<>());
-        peer.setPointersFromVout(new ArrayList<>());
+        peer.setTransactionPoolBackup(new ConcurrentHashMap<>());
+        peer.setUTXOHashMapBackup(new ConcurrentHashMap<>());
+        peer.setPointersFromVout(new CopyOnWriteArrayList<>());
     }
 
     /**
@@ -163,18 +165,19 @@ public class BlockChainServiceImpl implements BlockChainService {
      * @param txs
      */
     private void receiveBlockAtEndOfChain(Peer peer, List<Transaction> txs) {
-        HashMap<Pointer, UTXO> utxoHashMap = peer.getUTXOHashMap();
-        HashMap<String, Transaction> pool = peer.getTransactionPool();
+        ConcurrentHashMap<Pointer, UTXO> utxoHashMap = peer.getUTXOHashMap();
+        ConcurrentHashMap<String, Transaction> pool = peer.getTransactionPool();
 
         //更新的utxo集合,删除已经消费了的UTXO块并将这些被删除的utxo集合进行备份
         peer.setUTXOHashMapBackup(transactionService.removeSpentUTXOFromTxs(peer.getUTXOHashMap(), txs));
         //找到输出单元的定位指针,用于备份
-        List<Pointer> pointers = transactionService.findVoutPointerFromTxs(txs);
+        CopyOnWriteArrayList<Pointer> pointers = transactionService.findVoutPointerFromTxs(txs);
         peer.setPointersFromVout(pointers);
         //将utxo添加到集合中去
         transactionService.addUTXOFromTxsToMap(utxoHashMap, txs);
         //删除交易池中的数据
-        HashMap<String, Transaction> poolBackup = transactionService.removeTransactionFromTransactionPool(pool, txs);
+        ConcurrentHashMap<String, Transaction> poolBackup = transactionService.
+                removeTransactionFromTransactionPool(pool, txs);
         //备份数据，用于回滚
         peer.setTransactionPoolBackup(poolBackup);
     }

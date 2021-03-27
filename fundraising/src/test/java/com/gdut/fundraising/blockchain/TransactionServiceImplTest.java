@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 
 class TransactionServiceImplTest {
 
@@ -30,7 +31,7 @@ class TransactionServiceImplTest {
 
         Peer peer = getPeer();
         Wallet wallet = peer.getWallet();
-        HashMap<Pointer, UTXO> utxoMap = new HashMap<>();
+        ConcurrentHashMap<Pointer, UTXO> utxoMap = new ConcurrentHashMap<>();
         UTXO utxo = getUTXO(wallet.getKeyPair().getPublic(),
                 wallet.getAddress(), userId, projectId);
         utxoMap.put(utxo.getPointer(), utxo);
@@ -84,7 +85,7 @@ class TransactionServiceImplTest {
 
         Peer peer = getPeer();
         Wallet wallet = peer.getWallet();
-        HashMap<Pointer, UTXO> utxoMap = new HashMap<>();
+        ConcurrentHashMap<Pointer, UTXO> utxoMap = new ConcurrentHashMap<>();
         UTXO utxo = getUTXO(wallet.getKeyPair().getPublic(),
                 wallet.getAddress(), userId, projectId);
         utxoMap.put(utxo.getPointer(), utxo);
@@ -107,7 +108,7 @@ class TransactionServiceImplTest {
         String projectId = "aweasdaxxx";
         Peer peer = getPeer();
         Wallet wallet = peer.getWallet();
-        HashMap<Pointer, UTXO> utxoMap = new HashMap<>();
+        ConcurrentHashMap<Pointer, UTXO> utxoMap = new ConcurrentHashMap<>();
         UTXO utxo = getUTXO(wallet.getKeyPair().getPublic(),
                 wallet.getAddress(), null, projectId);
         utxoMap.put(utxo.getPointer(), utxo);

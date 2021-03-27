@@ -119,10 +119,10 @@ public class BlockChainServiceImplTest {
 
 
         Transaction tx1 = transactionService.createTransaction(peer, peerA.getWallet().getAddress(),
-                100, projectId, userId1);
+                100, projectId, userId);
 
         Assert.assertEquals(tx1.getFormProjectId(), projectId);
-        Assert.assertEquals(tx1.getFromUserId(), userId1);
+        Assert.assertEquals(tx1.getFromUserId(), userId);
 
         txs.clear();
         txs.add(tx1);
@@ -141,25 +141,22 @@ public class BlockChainServiceImplTest {
         UTXO utxo = peer.getUTXOHashMap().get(new Pointer(tx1.getId(), 0));
 
         //验证对应交易创建的block中，生成的utxo附带的项目信息(userId projectId)是正确的
-        Assert.assertEquals(utxo.getFromUserId(), userId1);
+        Assert.assertEquals(utxo.getFromUserId(), userId);
         Assert.assertEquals(utxo.getFormProjectId(), projectId);
-        Assert.assertEquals(utxo.getVout().getFromUserId(),userId1);
-        Assert.assertEquals(utxo.getVout().getFormProjectId(),projectId);
+        Assert.assertEquals(utxo.getVout().getFromUserId(), userId);
+        Assert.assertEquals(utxo.getVout().getFormProjectId(), projectId);
 
         String userId2 = "3sda4324234234234";
 
         Transaction tx2 = transactionService.createTransaction(peer, peerA.getWallet().getAddress(),
-                200, projectId, userId2);
+                200, projectId, userId);
 
         txs.add(tx2);
         Block block2 = MockDataUtil.buildBlock(1, block.getHash(), txs);
         //打包第三个区块(包含 tx1 tx2)到区块链中
-        try{
-         blockChainService.addBlockToChain(peer, block2);
-         Assert.fail("No exception");
-        }catch (BaseException ex){
-            Assert.assertEquals(ex.getMessage(),"区块位置计算出错");
-        }
+
+        boolean res = blockChainService.addBlockToChain(peer, block2);
+        Assert.assertFalse(res);
 
 //        Assert.assertTrue(result);
 //        Assert.assertTrue(peer.getBlockChain().size() == 2);
@@ -174,7 +171,8 @@ public class BlockChainServiceImplTest {
 
     @Test
     public void testAddBlockToChainUpLastBlock() {
-        String projectId="asfdscsdcxxxx";
+        String projectId = "asfdscsdcxxxx";
+        String user = "dasdasd";
 
         TransactionServiceImpl transactionService = new TransactionServiceImpl();
         BlockChainServiceImpl blockChainService = new BlockChainServiceImpl();
@@ -188,7 +186,7 @@ public class BlockChainServiceImplTest {
         HashMap<Pointer, UTXO> utxoMap = new HashMap<>();
         //创建第一笔交易
         Transaction tx = transactionService.createCoinBaseTransaction(peer, peer.getWallet().getAddress(),
-                null,projectId,1000);
+                user, projectId, 1000);
         List<Transaction> txs = new ArrayList<>();
         txs.add(tx);
         //封装数据成区块
@@ -199,7 +197,7 @@ public class BlockChainServiceImplTest {
         Assert.assertTrue(result);
         Peer peerA = getPeer();
         Transaction tx1 = transactionService.createTransaction(peer, peerA.getWallet().getAddress(),
-                100,projectId,null);
+                100, projectId, user);
         txs.clear();
         txs.add(tx1);
         Block block1 = MockDataUtil.buildBlock(1, block.getHash(), txs);
@@ -216,18 +214,15 @@ public class BlockChainServiceImplTest {
         Assert.assertTrue(peer.getUTXOHashMap().containsKey(new Pointer(tx1.getId(), 0)));
         Assert.assertTrue(peer.getUTXOHashMap().containsKey(new Pointer(tx1.getId(), 1)));
 
-        Transaction tx2 = transactionService.createTransaction(peer, peerA.getWallet().getAddress(), 200,projectId,null);
+        Transaction tx2 = transactionService.createTransaction(peer, peerA.getWallet().getAddress(), 200, projectId, user);
         txs.clear();
         txs.add(tx2);
         Block block2 = MockDataUtil.buildBlock(1, block.getHash(), txs);
         //打包第三个区块(只含 tx1 tx2)到区块链中
         //会爆错，整个区块链会混乱，因为上一个交易tx1丢失了
-        try{
-            blockChainService.addBlockToChain(peer, block2);
-            Assert.fail("No exception");
-        }catch (BaseException ex){
-            Assert.assertEquals(ex.getMessage(),"区块位置计算出错");
-        }
+
+        boolean res = blockChainService.addBlockToChain(peer, block2);
+        Assert.assertFalse(res);
 //        result = blockChainService.addBlockToChain(peer, block2);
 //        Assert.assertTrue(result);
 //        Assert.assertTrue(peer.getBlockChain().size() == 2);
@@ -279,10 +274,10 @@ public class BlockChainServiceImplTest {
 
 
         Transaction tx1 = transactionService.createTransaction(peer, peerA.getWallet().getAddress(),
-                100, projectId, userId1);
+                100, projectId, userId);
 
         Assert.assertEquals(tx1.getFormProjectId(), projectId);
-        Assert.assertEquals(tx1.getFromUserId(), userId1);
+        Assert.assertEquals(tx1.getFromUserId(), userId);
 
         txs.clear();
         txs.add(tx1);
@@ -292,14 +287,14 @@ public class BlockChainServiceImplTest {
         Assert.assertTrue(result);
 
         //tx1交易所在区块添加后，会生成utxo
-        Assert.assertEquals(peer.getUTXOHashMap().get(new Pointer(tx1.getId(),0)).getVout().getMoney(),100);
-        Assert.assertEquals(peer.getUTXOHashMapBackup().get(new Pointer(tx.getId(),0)).getVout().getMoney(),1000);
-        Assert.assertNull(peer.getUTXOHashMap().get(new Pointer(tx.getId(),0)));
+        Assert.assertEquals(peer.getUTXOHashMap().get(new Pointer(tx1.getId(), 0)).getVout().getMoney(), 100);
+        Assert.assertEquals(peer.getUTXOHashMapBackup().get(new Pointer(tx.getId(), 0)).getVout().getMoney(), 1000);
+        Assert.assertNull(peer.getUTXOHashMap().get(new Pointer(tx.getId(), 0)));
         //回滚到block1
         blockChainService.rollBackBlock(peer, block1);
         //tx1交易所在区块回滚后，utxo会删除
-        Assert.assertNull(peer.getUTXOHashMap().get(new Pointer(tx1.getId(),0)));
-        Assert.assertEquals(peer.getUTXOHashMap().get(new Pointer(tx.getId(),0)).getVout().getMoney(),1000);
+        Assert.assertNull(peer.getUTXOHashMap().get(new Pointer(tx1.getId(), 0)));
+        Assert.assertEquals(peer.getUTXOHashMap().get(new Pointer(tx.getId(), 0)).getVout().getMoney(), 1000);
 
     }
 
@@ -342,10 +337,10 @@ public class BlockChainServiceImplTest {
 
 
         Transaction tx1 = transactionService.createTransaction(peer, peerA.getWallet().getAddress(),
-                100, projectId, userId1);
+                100, projectId, userId);
 
         Assert.assertEquals(tx1.getFormProjectId(), projectId);
-        Assert.assertEquals(tx1.getFromUserId(), userId1);
+        Assert.assertEquals(tx1.getFromUserId(), userId);
 
         txs.clear();
         txs.add(tx1);
@@ -358,8 +353,8 @@ public class BlockChainServiceImplTest {
             //回滚到block1
             blockChainService.rollBackBlock(peer, block);
             Assert.fail("No Exception");
-        }catch (BaseException e){
-            Assert.assertEquals(e.getMessage(),"不是最后一个区块，无法回滚!!!");
+        } catch (BaseException e) {
+            Assert.assertEquals(e.getMessage(), "不是最后一个区块，无法回滚!!!");
         }
 
     }

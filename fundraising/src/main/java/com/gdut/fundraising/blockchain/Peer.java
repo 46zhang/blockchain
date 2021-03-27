@@ -23,6 +23,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 /**
@@ -33,14 +35,14 @@ public class Peer {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(Peer.class);
     /**
-     * 区块链的数据，用volatile关键字声明，确保某个线程修改后，对其他线程可见
+     * 区块链的数据
      */
-    volatile private List<Block> blockChain;
+    private CopyOnWriteArrayList<Block> blockChain;
 
     /**
      * utxo 哈希集
      */
-    volatile private HashMap<Pointer, UTXO> UTXOHashMap;
+    private ConcurrentHashMap<Pointer, UTXO> UTXOHashMap;
 
     /**
      * 钱包
@@ -50,37 +52,37 @@ public class Peer {
     /**
      * 孤立交易池
      */
-    private HashMap<String, Transaction> orphanPool;
+    private ConcurrentHashMap<String, Transaction> orphanPool;
 
     /**
      * 交易池
      */
-    volatile private HashMap<String, Transaction> transactionPool;
+    volatile private ConcurrentHashMap<String, Transaction> transactionPool;
 
     /**
      * utxo 哈希集备份
      */
-    private HashMap<Pointer, UTXO> UTXOHashMapBackup;
+    private ConcurrentHashMap<Pointer, UTXO> UTXOHashMapBackup;
 
     /**
      * 用户自身的utxo备份
      */
-    private HashMap<Pointer, UTXO> ownUTXOHashMapBackup;
+    private ConcurrentHashMap<Pointer, UTXO> ownUTXOHashMapBackup;
 
     /**
      * 交易池备份
      */
-    private HashMap<String, Transaction> transactionPoolBackup;
+    private ConcurrentHashMap<String, Transaction> transactionPoolBackup;
 
     /**
      * 输出单元的定位指针，用于数据回滚
      */
-    private List<Pointer> pointersFromVout;
+    private CopyOnWriteArrayList<Pointer> pointersFromVout;
 
     /**
      * 输出单元封装成的utxo，用于数据回滚
      */
-    private List<UTXO> utxosFromVout;
+    private CopyOnWriteArrayList<UTXO> utxosFromVout;
 
     /**
      * 区块链服务
@@ -96,11 +98,11 @@ public class Peer {
 
 
     public Peer() {
-        UTXOHashMap = new HashMap<>();
-        orphanPool = new HashMap<>();
-        transactionPool = new HashMap<>();
-        blockChain = new ArrayList<>();
-        transactionPoolBackup = new HashMap<>();
+        UTXOHashMap = new ConcurrentHashMap<>();
+        orphanPool = new ConcurrentHashMap<>();
+        transactionPool = new ConcurrentHashMap<>();
+        blockChain = new CopyOnWriteArrayList<>();
+        transactionPoolBackup = new ConcurrentHashMap<>();
         wallet = new Wallet();
     }
 
@@ -155,6 +157,10 @@ public class Peer {
     public boolean saveUTXOSet() {
         Properties props = System.getProperties(); //系统属性
         String port = (String) props.get("port");
+        //测试的时候test为Null
+        if(port==null){
+            port="test";
+        }
         boolean res = writeUTXOValues(port);
         if (!res) {
             LOGGER.error("写入UTXO到文件失败 {}", port);
@@ -165,6 +171,10 @@ public class Peer {
     public boolean saveTransactionSet() {
         Properties props = System.getProperties(); //系统属性
         String port = (String) props.get("port");
+        //测试的时候test为Null
+        if(port==null){
+            port="test";
+        }
         boolean res = writeTransactionValues(port);
         if (!res) {
             LOGGER.error("写入Transaction到文件失败 {}", port);
@@ -394,23 +404,23 @@ public class Peer {
         return blockChain;
     }
 
-    public void setBlockChain(List<Block> blockChain) {
+    public void setBlockChain(CopyOnWriteArrayList<Block> blockChain) {
         this.blockChain = blockChain;
     }
 
-    public HashMap<String, Transaction> getTransactionPool() {
+    public ConcurrentHashMap<String, Transaction> getTransactionPool() {
         return transactionPool;
     }
 
-    public void setTransactionPool(HashMap<String, Transaction> transactionPool) {
+    public void setTransactionPool(ConcurrentHashMap<String, Transaction> transactionPool) {
         this.transactionPool = transactionPool;
     }
 
-    public HashMap<String, Transaction> getOrphanPool() {
+    public ConcurrentHashMap<String, Transaction> getOrphanPool() {
         return orphanPool;
     }
 
-    public void setOrphanPool(HashMap<String, Transaction> orphanPool) {
+    public void setOrphanPool(ConcurrentHashMap<String, Transaction> orphanPool) {
         this.orphanPool = orphanPool;
     }
 
@@ -422,36 +432,36 @@ public class Peer {
         this.wallet = wallet;
     }
 
-    public HashMap<Pointer, UTXO> getUTXOHashMap() {
+    public ConcurrentHashMap<Pointer, UTXO> getUTXOHashMap() {
         return UTXOHashMap;
     }
 
-    public void setUTXOHashMap(HashMap<Pointer, UTXO> UTXOHashMap) {
+    public void setUTXOHashMap(ConcurrentHashMap<Pointer, UTXO> UTXOHashMap) {
         this.UTXOHashMap = UTXOHashMap;
     }
 
 
-    public HashMap<Pointer, UTXO> getUTXOHashMapBackup() {
+    public ConcurrentHashMap<Pointer, UTXO> getUTXOHashMapBackup() {
         return UTXOHashMapBackup;
     }
 
-    public void setUTXOHashMapBackup(HashMap<Pointer, UTXO> UTXOHashMapBackup) {
+    public void setUTXOHashMapBackup(ConcurrentHashMap<Pointer, UTXO> UTXOHashMapBackup) {
         this.UTXOHashMapBackup = UTXOHashMapBackup;
     }
 
-    public HashMap<Pointer, UTXO> getOwnUTXOHashMapBackup() {
+    public ConcurrentHashMap<Pointer, UTXO> getOwnUTXOHashMapBackup() {
         return ownUTXOHashMapBackup;
     }
 
-    public void setOwnUTXOHashMapBackup(HashMap<Pointer, UTXO> ownUTXOHashMapBackup) {
+    public void setOwnUTXOHashMapBackup(ConcurrentHashMap<Pointer, UTXO> ownUTXOHashMapBackup) {
         this.ownUTXOHashMapBackup = ownUTXOHashMapBackup;
     }
 
-    public HashMap<String, Transaction> getTransactionPoolBackup() {
+    public ConcurrentHashMap<String, Transaction> getTransactionPoolBackup() {
         return transactionPoolBackup;
     }
 
-    public void setTransactionPoolBackup(HashMap<String, Transaction> transactionPoolBackup) {
+    public void setTransactionPoolBackup(ConcurrentHashMap<String, Transaction> transactionPoolBackup) {
         this.transactionPoolBackup = transactionPoolBackup;
     }
 
@@ -459,7 +469,7 @@ public class Peer {
         return pointersFromVout;
     }
 
-    public void setPointersFromVout(List<Pointer> pointersFromVout) {
+    public void setPointersFromVout(CopyOnWriteArrayList<Pointer> pointersFromVout) {
         this.pointersFromVout = pointersFromVout;
     }
 
@@ -467,7 +477,7 @@ public class Peer {
         return utxosFromVout;
     }
 
-    public void setUtxosFromVout(List<UTXO> utxosFromVout) {
+    public void setUtxosFromVout(CopyOnWriteArrayList<UTXO> utxosFromVout) {
         this.utxosFromVout = utxosFromVout;
     }
 

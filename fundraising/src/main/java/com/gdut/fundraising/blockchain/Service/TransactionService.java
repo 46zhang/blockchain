@@ -7,6 +7,8 @@ import com.gdut.fundraising.blockchain.UTXO;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * 交易服务
@@ -56,7 +58,7 @@ public interface TransactionService {
      * @param txs
      * @return
      */
-    HashMap<Pointer, UTXO> removeSpentUTXOFromTxs(HashMap<Pointer, UTXO> utxoHashMap, List<Transaction> txs);
+    ConcurrentHashMap<Pointer, UTXO> removeSpentUTXOFromTxs(ConcurrentHashMap<Pointer, UTXO> utxoHashMap, List<Transaction> txs);
 
     /**
      * 将交易中的vout封装为utxo，插入到到utxoMap
@@ -64,7 +66,7 @@ public interface TransactionService {
      * @param utxoHashMap
      * @param txs
      */
-    void addUTXOFromTxsToMap(HashMap<Pointer, UTXO> utxoHashMap, List<Transaction> txs);
+    void addUTXOFromTxsToMap(ConcurrentHashMap<Pointer, UTXO> utxoHashMap, List<Transaction> txs);
 
     /**
      * 在交易列表中找到输出单元的的定位指针列表
@@ -72,7 +74,7 @@ public interface TransactionService {
      * @param txs
      * @return
      */
-    List<Pointer> findVoutPointerFromTxs(List<Transaction> txs);
+    CopyOnWriteArrayList<Pointer> findVoutPointerFromTxs(List<Transaction> txs);
 
     /**
      * 从交易池中移除交易
@@ -81,7 +83,7 @@ public interface TransactionService {
      * @param txs
      * @return
      */
-    HashMap<String, Transaction> removeTransactionFromTransactionPool(HashMap<String, Transaction> pool,
+    ConcurrentHashMap<String, Transaction> removeTransactionFromTransactionPool(ConcurrentHashMap<String, Transaction> pool,
                                                                       List<Transaction> txs);
 
     /**

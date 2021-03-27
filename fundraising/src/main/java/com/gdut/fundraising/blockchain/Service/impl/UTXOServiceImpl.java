@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class UTXOServiceImpl implements UTXOService {
@@ -17,8 +18,8 @@ public class UTXOServiceImpl implements UTXOService {
      * @return
      */
     @Override
-    public HashMap<Pointer, UTXO> deleteUTXOByPointer(HashMap<Pointer, UTXO> utxoHashMap, List<Pointer> pointerList) {
-        HashMap<Pointer, UTXO> deletedUTXO=new HashMap<>();
+    public ConcurrentHashMap<Pointer, UTXO> deleteUTXOByPointer(ConcurrentHashMap<Pointer, UTXO> utxoHashMap, List<Pointer> pointerList) {
+        ConcurrentHashMap<Pointer, UTXO> deletedUTXO=new ConcurrentHashMap<>();
         for(Pointer p: pointerList){
             if(utxoHashMap.containsKey(p)){
                 deletedUTXO.put(p,utxoHashMap.get(p));
@@ -34,7 +35,7 @@ public class UTXOServiceImpl implements UTXOService {
      * @param utxoList
      */
     @Override
-    public void addUTXOToMap(HashMap<Pointer, UTXO> utxoHashMap, List<UTXO> utxoList) {
+    public void addUTXOToMap(ConcurrentHashMap<Pointer, UTXO> utxoHashMap, List<UTXO> utxoList) {
         for(UTXO utxo:utxoList){
             utxoHashMap.put(utxo.getPointer(),utxo);
         }

@@ -5,6 +5,7 @@ import com.gdut.fundraising.blockchain.UTXO;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public interface UTXOService {
     /**
@@ -13,8 +14,8 @@ public interface UTXOService {
      * @param pointerList
      * @return
      */
-    HashMap<Pointer, UTXO> deleteUTXOByPointer(HashMap<Pointer, UTXO> utxoHashMap, List<Pointer> pointerList);
+    ConcurrentHashMap<Pointer, UTXO> deleteUTXOByPointer(ConcurrentHashMap<Pointer, UTXO> utxoHashMap, List<Pointer> pointerList);
 
-    void addUTXOToMap(HashMap<Pointer, UTXO>utxoHashMap, List<UTXO> utxoList);
+    void addUTXOToMap(ConcurrentHashMap<Pointer, UTXO>utxoHashMap, List<UTXO> utxoList);
 
 }
