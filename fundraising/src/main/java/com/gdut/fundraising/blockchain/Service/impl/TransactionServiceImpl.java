@@ -161,10 +161,10 @@ public class TransactionServiceImpl implements TransactionService {
                 peer.getOrphanPool().put(vin.getToSpent().getTxId(), transaction);
                 return false;
             }
-            //校验地址跟数字签名
-            if (!verifyAddressAndSignature(vin, utxo, transaction.getOutList())) {
-                return false;
-            }
+//            //校验地址跟数字签名
+//            if (!verifyAddressAndSignature(vin, utxo, transaction.getOutList())) {
+//                return false;
+//            }
         }
 
         return true;
