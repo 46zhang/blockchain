@@ -46,8 +46,9 @@ public class RaftLogManagerImpl implements RaftLogManager {
      */
     private void loadAllLog() {
         String[] fileNames = FileUtils.getAllFileNameInDir(pathName);
-        for (String file : fileNames) {
-            String data = FileUtils.read(FileUtils.buildPath(pathName, file));
+
+        for (int i = 0; i < fileNames.length; ++i) {
+            String data = FileUtils.read(FileUtils.buildPath(pathName, String.valueOf(i+1) + ".json"));
             if (data != null) {
                 LogEntry entry = JSON.parseObject(data, LogEntry.class);
                 logEntries.add(entry);
@@ -106,7 +107,7 @@ public class RaftLogManagerImpl implements RaftLogManager {
     @Override
     public LogEntry read(long index) {
         if (index <= logEntries.size()) {
-            LOGGER.info("log manager read index:{},size:{}",index,logEntries.size());
+            //LOGGER.info("log manager read index:{},size:{}",index,logEntries.size());
             return logEntries.get((int) index - 1);
         }
         return null;
