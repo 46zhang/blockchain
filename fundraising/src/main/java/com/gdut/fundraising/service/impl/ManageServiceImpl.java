@@ -1,6 +1,7 @@
 package com.gdut.fundraising.service.impl;
 
 
+import com.gdut.fundraising.dto.FundFlowGraphResult;
 import com.gdut.fundraising.dto.NodeQueryResult;
 import com.gdut.fundraising.dto.ReadListResult;
 import com.gdut.fundraising.entities.*;
@@ -194,6 +195,16 @@ public class ManageServiceImpl implements ManageService {
         UserTblEntity userTblEntity = manageMapper.selectUserByToken(token);
         if (userTblEntity != null && userTblEntity.getUserId().length() >= 4 && "root".equals(userTblEntity.getUserId().substring(0, 4))) {
             return BCTService.getProjectFundFlow(projectId);
+        } else {
+            throw new BaseException(400, "token认证失败!");
+        }
+    }
+
+    @Override
+    public FundFlowGraphResult readOneProjectFundGraph(String token, String projectId) {
+        UserTblEntity userTblEntity = manageMapper.selectUserByToken(token);
+        if (userTblEntity != null && userTblEntity.getUserId().length() >= 4 && "root".equals(userTblEntity.getUserId().substring(0, 4))) {
+            return BCTService.getProjectFundGraph(projectId);
         } else {
             throw new BaseException(400, "token认证失败!");
         }

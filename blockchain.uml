@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.gdut.fundraising.blockchain</OriginalElement>
+  <nodes>
+    <node x="0.0" y="0.0">com.gdut.fundraising.blockchain.Peer</node>
+    <node x="478.0" y="0.0">com.gdut.fundraising.blockchain.Transaction</node>
+    <node x="231.0" y="376.0">com.gdut.fundraising.blockchain.UTXO</node>
+    <node x="0.0" y="614.0">com.gdut.fundraising.blockchain.Vout</node>
+    <node x="0.0" y="376.0">com.gdut.fundraising.blockchain.Block</node>
+    <node x="214.0" y="614.0">com.gdut.fundraising.blockchain.Wallet</node>
+    <node x="397.0" y="614.0">com.gdut.fundraising.blockchain.Pointer</node>
+    <node x="448.0" y="376.0">com.gdut.fundraising.blockchain.Vin</node>
+  </nodes>
+  <notes />
+  <edges />
+  <settings layout="Hierarchic Group" zoom="0.8839050131926122" x="323.5" y="369.0" />
+  <SelectedNodes>
+    <node>com.gdut.fundraising.blockchain.Peer</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Fields</Category>
+    <Category>Inner Classes</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+

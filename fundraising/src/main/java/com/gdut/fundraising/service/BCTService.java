@@ -2,6 +2,7 @@ package com.gdut.fundraising.service;
 
 import com.gdut.fundraising.blockchain.Block;
 import com.gdut.fundraising.blockchain.Transaction;
+import com.gdut.fundraising.dto.FundFlowGraphResult;
 import com.gdut.fundraising.dto.NodeQueryResult;
 import com.gdut.fundraising.entities.FundFlowEntity;
 import com.gdut.fundraising.entities.SpendEntity;
@@ -79,4 +80,8 @@ public interface BCTService {
      * @return
      */
     List<FundFlowEntity> getAllBlockFundFlow();
+
+    FundFlowGraphResult getProjectFundGraph(String projectId);
+
+    FundFlowGraphResult getOneUserProjectFundGraph(String userId, String projectId);
 }

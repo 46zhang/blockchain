@@ -77,4 +77,10 @@ public class ManagerController {
     }
 
 
+    @GetMapping("/getProjectFundGraph")
+    public Map readOneProjectFundGraph(@RequestHeader("AUTHORIZATION") String token,@RequestParam("projectId") String projectId) {
+        return JsonResult.success(manageService.readOneProjectFundGraph(token.substring(7),projectId)).result();
+    }
+
+
 }

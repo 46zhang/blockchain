@@ -1,9 +1,6 @@
 package com.gdut.fundraising.service;
 
-import com.gdut.fundraising.dto.LoginResult;
-import com.gdut.fundraising.dto.NodeQueryResult;
-import com.gdut.fundraising.dto.ReadDonationResult;
-import com.gdut.fundraising.dto.ReadExpenditureResult;
+import com.gdut.fundraising.dto.*;
 import com.gdut.fundraising.entities.FundFlowEntity;
 import com.gdut.fundraising.entities.ProjectTblEntity;
 import com.gdut.fundraising.entities.UserTblEntity;
@@ -44,4 +41,6 @@ public interface UserService {
     List<FundFlowEntity> getUserContribution(String token, String userId);
 
     List<FundFlowEntity> getUserOneProjectFund(String token, String projectId, String userId);
+
+    FundFlowGraphResult getUserOneProjectFundGraph(String token, String projectId, String userId);
 }

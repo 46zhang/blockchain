@@ -1,11 +1,12 @@
 package com.gdut.fundraising.service.impl;
 
 import com.gdut.fundraising.blockchain.*;
+import com.gdut.fundraising.constant.GraphLineTypeEnum;
 import com.gdut.fundraising.constant.NodeNameEnum;
 import com.gdut.fundraising.constant.raft.NodeStatus;
+import com.gdut.fundraising.dto.FundFlowGraphResult;
 import com.gdut.fundraising.dto.NodeQueryResult;
-import com.gdut.fundraising.entities.FundFlowEntity;
-import com.gdut.fundraising.entities.SpendEntity;
+import com.gdut.fundraising.entities.*;
 import com.gdut.fundraising.entities.raft.BlockChainNode;
 import com.gdut.fundraising.entities.raft.NodeInfo;
 import com.gdut.fundraising.exception.BaseException;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BCTServiceImpl implements BCTService {
@@ -316,6 +318,139 @@ public class BCTServiceImpl implements BCTService {
             }
         }
         return fundFlowEntities;
+    }
+
+    @Override
+    public FundFlowGraphResult getProjectFundGraph(String projectId) {
+        FundFlowGraphResult fundFlowGraphResult = new FundFlowGraphResult();
+
+        Set<GraphNodeEntity> nodeSet = new HashSet<>();
+        Map<GraphPointerEntity, GraphEdgeEntity> edgesMap = new HashMap<>();
+        Map<GraphNodeEntity, Long> nodeBalance = new HashMap<>();
+        List<Block> blockChain = blockChainNode.getPeer().getBlockChain();
+
+        for (int i =0; i < blockChain.size(); ++i) {
+            Block block = blockChain.get(i);
+            //实际上时间复杂度不会很高，因为每个block只有1-2个transaction
+            for (Transaction tx : block.getTxs()) {
+                if (tx.getFormProjectId().equals(projectId)) {
+                    buildFundGraph(nodeSet, edgesMap, tx, nodeBalance);
+                }
+            }
+        }
+
+        //把上述的边集、点集合加起来
+        List<GraphNodeEntity> nodes = new ArrayList<>(nodeSet);
+        List<GraphEdgeEntity> edges = new ArrayList<>(edgesMap.values());
+
+        fundFlowGraphResult.setNodes(nodes);
+        fundFlowGraphResult.setEdges(edges);
+        return fundFlowGraphResult;
+    }
+
+    @Override
+    public FundFlowGraphResult getOneUserProjectFundGraph(String userId, String projectId) {
+        FundFlowGraphResult fundFlowGraphResult = new FundFlowGraphResult();
+
+        Set<GraphNodeEntity> nodeSet = new HashSet<>();
+        Map<GraphPointerEntity, GraphEdgeEntity> edgesMap = new HashMap<>();
+        List<Block> blockChain = blockChainNode.getPeer().getBlockChain();
+        Map<GraphNodeEntity, Long> nodeBalanceMap = new HashMap<>();
+        for (int i =0; i < blockChain.size(); ++i) {
+            Block block = blockChain.get(i);
+            //实际上时间复杂度不会很高，因为每个block只有1-2个transaction
+            for (Transaction tx : block.getTxs()) {
+                if (tx.getFormProjectId().equals(projectId) && tx.getFromUserId().equals(userId)) {
+                    buildFundGraph(nodeSet, edgesMap, tx, nodeBalanceMap);
+                }
+            }
+        }
+
+        //把上述的边集、点集合加起来
+        List<GraphNodeEntity> nodes = new ArrayList<>(nodeSet);
+        List<GraphEdgeEntity> edges = new ArrayList<>(edgesMap.values());
+
+        fundFlowGraphResult.setNodes(nodes);
+        fundFlowGraphResult.setEdges(edges);
+        return fundFlowGraphResult;
+    }
+
+    private void buildFundGraph(Set<GraphNodeEntity> nodeSet, Map<GraphPointerEntity,
+            GraphEdgeEntity> edgesMap, Transaction tx, Map<GraphNodeEntity, Long> nodeBalanceMap) {
+
+        GraphNodeEntity from = new GraphNodeEntity();
+        GraphNodeEntity to = new GraphNodeEntity();
+
+        //设置资金流向的地址
+        to.setId(tx.getOutList().get(0).getToAddress());
+        to.setLabel(transferAddressToName(tx.getOutList().get(0).getToAddress()));
+        if (tx.isCoinBase()) {
+            //如果是创币交易，那么资金来源就是用户本身
+            from.setId(tx.getFromUserId());
+            from.setLabel(findUserNameById(tx.getFromUserId()));
+        } else {
+            //如果不是创币交易的话，就直接用输入地址就行
+            from.setId(tx.getInList().get(0).getAddress());
+            from.setLabel(transferAddressToName(tx.getInList().get(0).getAddress()));
+        }
+
+        nodeSet.add(from);
+        nodeSet.add(to);
+
+        //查找金额
+        long sum = tx.getOutputMoneyNoIncludeChange();
+        long num = 0;
+        GraphPointerEntity graphPointerEntity = new GraphPointerEntity(from, to);
+        GraphEdgeEntity edge = edgesMap.get(graphPointerEntity);
+        //需要判断是否存在同起点，同终点的边，是的话，把他们的金额加起来
+        if (edge == null) {
+            GraphEdgeEntity edge1 = new GraphEdgeEntity();
+            edge1.setLabel(String.valueOf(sum));
+            edge1.setSource(from.getId());
+            edge1.setTarget(to.getId());
+            edge1.setType(GraphLineTypeEnum.QUADRATIC.getType());
+            edgesMap.put(graphPointerEntity, edge1);
+        } else {
+            num = Long.parseLong(edge.getLabel());
+            edge.setLabel(String.valueOf(num + sum));
+        }
+
+        //计算当前节点的余额
+        long balance = sum+(nodeBalanceMap.get(to) == null ? 0 : nodeBalanceMap.get(to));
+        //如果是创币交易，这笔捐款属于它的金钱
+        nodeBalanceMap.put(to, balance);
+        if (!tx.isCoinBase()) {
+            nodeBalanceMap.put(from, (nodeBalanceMap.get(from) == null ? 0 : nodeBalanceMap.get(from)) - sum);
+        }
+
+
+        //判断是否需要画to节点的余额线
+        GraphPointerEntity ownToOwnPointer = new GraphPointerEntity(to, to);
+        if (balance > 0) {
+            //看看剩下多少余额
+            GraphEdgeEntity ownToOwnEdge = edgesMap.get(ownToOwnPointer);
+            if (ownToOwnEdge == null) {
+                ownToOwnEdge = new GraphEdgeEntity();
+                ownToOwnEdge.setSource(to.getId());
+                ownToOwnEdge.setTarget(to.getId());
+                ownToOwnEdge.setLabel(String.valueOf(balance));
+                ownToOwnEdge.setType(GraphLineTypeEnum.LOOP.getType());
+                edgesMap.put(ownToOwnPointer, ownToOwnEdge);
+            } else {
+                //加上之前的余额
+                ownToOwnEdge.setLabel(String.valueOf(balance));
+            }
+        } else {
+            //如果余额小于等于0，把线去掉
+            edgesMap.remove(ownToOwnPointer);
+        }
+
+        Long fromBalance=nodeBalanceMap.get(from);
+        if(fromBalance!=null && fromBalance<=0){
+            //如果余额小于等于0，把线去掉
+            edgesMap.remove(new GraphPointerEntity(from,from));
+        }
+
     }
 
     /**

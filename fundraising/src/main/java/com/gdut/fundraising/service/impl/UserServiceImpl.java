@@ -183,7 +183,7 @@ public class UserServiceImpl implements UserService {
     public Map contribution(String token, String projectId, int money) throws BaseException {
         UserTblEntity userTblEntity = userMapper.selectUserByToken(token);
         if (money <= 0)
-            throw new BaseException(400, "捐款不能为负！");
+            throw new BaseException(400, "捐款不能为0或者负数!");
         //判断账户是否存在
         if (userTblEntity != null) {
             //生成捐款实体
@@ -238,6 +238,17 @@ public class UserServiceImpl implements UserService {
         //判断账户是否存在
         if (userTblEntity != null) {
             return BCTService.getUserProjectAllFundFlow(userId, projectId);
+        } else {
+            throw new BaseException(400, "token认证失败！");
+        }
+    }
+
+    @Override
+    public FundFlowGraphResult getUserOneProjectFundGraph(String token, String projectId, String userId) {
+        UserTblEntity userTblEntity = userMapper.selectUserByToken(token);
+        //判断账户是否存在
+        if (userTblEntity != null) {
+            return BCTService.getOneUserProjectFundGraph(userId, projectId);
         } else {
             throw new BaseException(400, "token认证失败！");
         }

@@ -1,5 +1,6 @@
 package com.gdut.fundraising.service;
 
+import com.gdut.fundraising.dto.FundFlowGraphResult;
 import com.gdut.fundraising.dto.NodeQueryResult;
 import com.gdut.fundraising.entities.FundFlowEntity;
 import com.gdut.fundraising.entities.OrderTblEntity;
@@ -32,4 +33,6 @@ public interface ManageService {
     List<FundFlowEntity> readUserContribution(String token,String userId);
 
     List<FundFlowEntity> readProjectAllFund(String token,String projectId);
+
+    FundFlowGraphResult readOneProjectFundGraph(String substring, String projectId);
 }

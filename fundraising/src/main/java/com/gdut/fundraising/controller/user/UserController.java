@@ -97,4 +97,10 @@ public class UserController {
                                      @RequestParam("projectId") String projectId,@RequestParam("userId") String userId){
         return JsonResult.success(userService.getUserOneProjectFund(token.substring(7),projectId,userId)).result();
     }
+
+    @GetMapping("/getOneUserProjectFundGraph")
+    public Map getOneUserProjectFundGraph(@RequestHeader("AUTHORIZATION")String token,
+                                     @RequestParam("projectId") String projectId,@RequestParam("userId") String userId){
+        return JsonResult.success(userService.getUserOneProjectFundGraph(token.substring(7),projectId,userId)).result();
+    }
 }
