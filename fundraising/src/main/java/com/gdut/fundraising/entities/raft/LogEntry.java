@@ -2,6 +2,7 @@ package com.gdut.fundraising.entities.raft;
 
 import com.gdut.fundraising.blockchain.Block;
 
+
 public class LogEntry {
     //索引
     long index;

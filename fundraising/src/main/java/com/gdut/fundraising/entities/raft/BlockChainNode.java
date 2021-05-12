@@ -280,8 +280,11 @@ public class BlockChainNode extends DefaultNode {
                 LogEntry preLog = logEntries.getFirst();
                 appendLogRequest.setEntries(logEntries.toArray(new LogEntry[0]));
                 appendLogRequest.setPreLogTerm(preLog.getTerm());
-                appendLogRequest.setPrevLogIndex(preLog.getIndex()-1);
+                //TODO 之前的写法为：preLog.getIndex()-1 修改为preLog.getIndex() 需要验证正确性
+                appendLogRequest.setPrevLogIndex(preLog.getIndex());
                 appendLogRequest.setType(MessageType.APPEND_LOG.getValue());
+                LOGGER.info("request: {}",appendLogRequest);
+
                 try {
                     JsonResult response = networkService.post(nodeInfo.getIp(),
                             nodeInfo.getPort(), appendLogRequest);
@@ -368,9 +371,10 @@ public class BlockChainNode extends DefaultNode {
                 return;
             }
             LOGGER.info("===========HeartBeatTask-NextIndex =============");
-            for (NodeInfo node : nodeInfoSet.getNodeExceptSelf()) {
-                LOGGER.info("node {} nextIndex={}", node.getId(), nextIndexs.get(node));
-            }
+            //TODO 为了调试程序
+//            for (NodeInfo node : nodeInfoSet.getNodeExceptSelf()) {
+//                LOGGER.info("node {} nextIndex={}", node.getId(), nextIndexs.get(node));
+//            }
 
             preHeartBeatTime = System.currentTimeMillis();
 
@@ -391,8 +395,8 @@ public class BlockChainNode extends DefaultNode {
                         long term = heartBeatResult.getTerm();
 
                         if (term > currentTerm) {
-                            LOGGER.error("self will become follower, his term : {}, but my term : {}",
-                                    term, currentTerm);
+//                            LOGGER.error("self will become follower, his term : {}, but my term : {}",
+//                                    term, currentTerm);
                             currentTerm = currentTerm;
                             votedFor = "";
                             status = NodeStatus.FOLLOWER;
@@ -404,8 +408,8 @@ public class BlockChainNode extends DefaultNode {
 
                         node.setAlive(false);
 
-                        LOGGER.error("HeartBeatTask  Fail, request node : {}:{}", node.getIp(),
-                                node.getPort());
+//                        LOGGER.error("HeartBeatTask  Fail, request node : {}:{}", node.getIp(),
+//                                node.getPort());
                     }
                 }, false);
             }

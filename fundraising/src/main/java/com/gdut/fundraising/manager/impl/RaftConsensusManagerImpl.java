@@ -117,8 +117,8 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
 
             //心跳
             if (param.getEntries() == null || param.getEntries().length == 0) {
-                LOGGER.info("node {} append heartbeat success , he's term : {}, my term : {}",
-                        param.getLeaderId(), param.getTerm(), node.getCurrentTerm());
+//                LOGGER.info("node {} append heartbeat success , he's term : {}, my term : {}",
+//                        param.getLeaderId(), param.getTerm(), node.getCurrentTerm());
                 return AppendLogResult.ok(node.getCurrentTerm());
             }
 
@@ -129,12 +129,15 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
                 if ((logEntry = node.getRaftLogManager().read(param.getPrevLogIndex())) != null) {
                     // 如果日志在 prevLogIndex 位置处的日志条目的任期号和 prevLogTerm 不匹配，则返回 false
                     // 需要减小 nextIndex 重试.
+                    LOGGER.info("log: {}",logEntry);
+                    LOGGER.info("preLog:{}",param);
                     if (logEntry.getTerm() != param.getPreLogTerm()) {
+                        LOGGER.error("pre log index not match");
                         return result;
                     }
                 } else {
                     // index 不对, 需要递减 nextIndex 重试.
-                    LOGGER.info("index error need to reduce nextIndex now nextIndex: {}, own last log index: {}",
+                    LOGGER.error("index error need to reduce nextIndex now nextIndex: {}, own last log index: {}",
                             param.getPrevLogIndex(), node.getRaftLogManager().getLastLogIndex());
                     return result;
                 }
@@ -145,7 +148,7 @@ public class RaftConsensusManagerImpl implements RaftConsensusManager {
             LogEntry existLog = node.getRaftLogManager().read(((param.getPrevLogIndex() + 1)));
             if (existLog != null && existLog.getTerm() != param.getEntries()[0].getTerm()) {
                 // 删除这一条和之后所有的, 然后写入日志和状态机.
-                LOGGER.info("delete log entry because index are different from leader leader: {}, own: {}",
+                LOGGER.error("delete log entry because index are different from leader leader: {}, own: {}",
                         param, existLog);
                 node.getRaftLogManager().removeOnStartIndex(param.getPrevLogIndex() + 1);
             }

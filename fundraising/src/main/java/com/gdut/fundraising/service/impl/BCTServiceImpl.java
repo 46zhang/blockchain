@@ -415,41 +415,41 @@ public class BCTServiceImpl implements BCTService {
             edge.setLabel(String.valueOf(num + sum));
         }
 
-        //计算当前节点的余额
-        long balance = sum+(nodeBalanceMap.get(to) == null ? 0 : nodeBalanceMap.get(to));
-        //如果是创币交易，这笔捐款属于它的金钱
-        nodeBalanceMap.put(to, balance);
-        if (!tx.isCoinBase()) {
-            nodeBalanceMap.put(from, (nodeBalanceMap.get(from) == null ? 0 : nodeBalanceMap.get(from)) - sum);
-        }
-
-
-        //判断是否需要画to节点的余额线
-        GraphPointerEntity ownToOwnPointer = new GraphPointerEntity(to, to);
-        if (balance > 0) {
-            //看看剩下多少余额
-            GraphEdgeEntity ownToOwnEdge = edgesMap.get(ownToOwnPointer);
-            if (ownToOwnEdge == null) {
-                ownToOwnEdge = new GraphEdgeEntity();
-                ownToOwnEdge.setSource(to.getId());
-                ownToOwnEdge.setTarget(to.getId());
-                ownToOwnEdge.setLabel(String.valueOf(balance));
-                ownToOwnEdge.setType(GraphLineTypeEnum.LOOP.getType());
-                edgesMap.put(ownToOwnPointer, ownToOwnEdge);
-            } else {
-                //加上之前的余额
-                ownToOwnEdge.setLabel(String.valueOf(balance));
-            }
-        } else {
-            //如果余额小于等于0，把线去掉
-            edgesMap.remove(ownToOwnPointer);
-        }
-
-        Long fromBalance=nodeBalanceMap.get(from);
-        if(fromBalance!=null && fromBalance<=0){
-            //如果余额小于等于0，把线去掉
-            edgesMap.remove(new GraphPointerEntity(from,from));
-        }
+//        //计算当前节点的余额
+//        long balance = sum+(nodeBalanceMap.get(to) == null ? 0 : nodeBalanceMap.get(to));
+//        //如果是创币交易，这笔捐款属于它的金钱
+//        nodeBalanceMap.put(to, balance);
+//        if (!tx.isCoinBase()) {
+//            nodeBalanceMap.put(from, (nodeBalanceMap.get(from) == null ? 0 : nodeBalanceMap.get(from)) - sum);
+//        }
+//
+//
+//        //判断是否需要画to节点的余额线
+//        GraphPointerEntity ownToOwnPointer = new GraphPointerEntity(to, to);
+//        if (balance > 0) {
+//            //看看剩下多少余额
+//            GraphEdgeEntity ownToOwnEdge = edgesMap.get(ownToOwnPointer);
+//            if (ownToOwnEdge == null) {
+//                ownToOwnEdge = new GraphEdgeEntity();
+//                ownToOwnEdge.setSource(to.getId());
+//                ownToOwnEdge.setTarget(to.getId());
+//                ownToOwnEdge.setLabel(String.valueOf(balance));
+//                ownToOwnEdge.setType(GraphLineTypeEnum.LOOP.getType());
+//                edgesMap.put(ownToOwnPointer, ownToOwnEdge);
+//            } else {
+//                //加上之前的余额
+//                ownToOwnEdge.setLabel(String.valueOf(balance));
+//            }
+//        } else {
+//            //如果余额小于等于0，把线去掉
+//            edgesMap.remove(ownToOwnPointer);
+//        }
+//
+//        Long fromBalance=nodeBalanceMap.get(from);
+//        if(fromBalance!=null && fromBalance<=0){
+//            //如果余额小于等于0，把线去掉
+//            edgesMap.remove(new GraphPointerEntity(from,from));
+//        }
 
     }
 
